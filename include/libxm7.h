@@ -2,6 +2,11 @@
 //
 // Copyright (c) 2018 sverx
 
+#ifndef LIBXM7_H__
+#define LIBXM7_H__
+
+#include <nds/ndstypes.h>
+
 // Error defines:
 #define XM7_ERR_NOT_A_VALID_MODULE				0x01
 #define XM7_ERR_UNKNOWN_MODULE_VERSION			0x02
@@ -399,3 +404,5 @@ void XM7_UnloadMOD (XM7_ModuleManager_Type*);
 
 void XM7_SetReplayStyle  (XM7_ModuleManager_Type* Module, u8 style);
 void XM7_SetPanningStyle (XM7_ModuleManager_Type* Module, u8 style, u8 displacement);
+
+#endif // LIBXM7_H__
