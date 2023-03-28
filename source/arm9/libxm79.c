@@ -2,7 +2,7 @@
 #include <stdlib.h>  // for malloc()
 #include <string.h>  // for memcpy(), memcmp()
 
-#include "../../arm7/source/libxm7.h"
+#include "libxm7.h"
 
 // MOD octave 0 difference
 #define AMIGABASEOCTAVE 2
