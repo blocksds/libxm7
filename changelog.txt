@@ -1,0 +1,89 @@
+libxm7 Changelog
+
+----- version release 1.06 ------
+
+[bug] Effect E5x (set note finetune) now works correctly also with MODs
+[bug] Effect Dxx (pattern break) works as expected when using hex values
+
+----- version release 1.04 ------
+
+[add] MOD support added for 4 and 8 channel modules subtypes:'M.K.','M!K!','FLT4','OCTA','CD81','FLT8'
+[add] MOD support added for 1 to 16 channel modules subtypes:'TDZx','xCHN','xxCH'
+[add] On-the-fly sample change feature, for ProTracker MOD modules
+[add] It's possible to select different replay modes
+[add] It's possible to select different panning modes and panning 'apertures'
+
+[XM7_LoadXM() ARM9 XM loading function:]
+
+[bug] XM7_LoadXM() now will load instrument envelopes (both volume&panning) and settings (fadeout/autovibrato)
+      even if the file has been saved with SkaleTracker
+
+----- version release 1.00 ------
+
+[add] Instrument panning envelope is now supported
+[add] Instrument 'auto' vibrato is now supported
+[add] Amiga frequency table mode (MOD native mode) is now supported
+
+[bug] Effect Hxy (slide global volume) now has memory effect
+[bug] Effect EDx (note delay) now retrigs last note and his envelope when specified on a 'empty' line
+[bug] Effect E9x (note retrig) now retrigs instrument envelope too
+[bug] Effect Lxx (Set volume envelope position) now starts working in the first tick
+[bug] Instrument finetune parameter 3 LSB are now ignored, as in FastTrackerII
+
+[XM7_LoadXM() ARM9 XM loading function:]
+
+[bug] XM7_LoadXM() now doesn't fail while loading XMs containing multi-sample instrument with 16bits
+      samples in it
+
+----- beta version 0.93 ------
+
+[add] Vibrato effect (4xy) and vibrato control effect (E4x) are now supported.
+[add] Tremolo effect (7xy) and tremolo control effect (E7x) are now supported.
+[add] Vibrato with volume slide effect (6xy) is now fully supported.
+[add] Tremor effect (Txy) is now supported.
+[add] Pattern loop effect (E6x) is now supported.
+[add] Instrument finetune effect (E5x) is now supported.
+[add] Glissando control effect (E3x) is now supported.
+[add] Vibrato volume column effect (Vx) is now supported.
+[add] Set vibrato speed volume column effect (Sx) is now supported.
+
+[bug] notes specified 'alone' (with no istrument) in the pattern now shouldn't lead unpredictable
+      results (it was happening only if you never specified an instrument before in that channel)
+      Also, notes 'alone' should now be played correctly
+[bug] high pitch notes (octave 7 and above) of instruments with sample finetuning (or pitch bended)
+      now shouldn't be "muted"
+[bug] Instrument envelopes having points over the 255th tick should now work correctly anyway
+[bug] effect EEx (pattern delay) now should produce a correct delay even when it used with an Fxx
+      effect (set song speed) on the same line
+[bug] effect 9xx (sample offset) now shouldn't give weird side effects when used with a sample
+      that has a loop... and 'memory effect', should work, now.
+
+[XM7_LoadXM() / XM7_Unload() ARM9 XM loading/unloading functions:]
+
+[bug] "squeezed" XMs can now be loaded correctly
+[bug] conversion from ping pong to forward loop now shouldn't cause instrument detuning
+[bug] XMs that fail to load now will be correctly unallocated from memory using XM7_Unload()
+
+----- beta version 0.81 ----
+
+[add] Portamento slide effects (1xx, 2xx, E1x, E2x, X1x, X2x) are now supported.
+[add] Portamento to note effect (3xx) is now supported.
+[add] Portamento to note with volume slide effect (5xy) is now fully supported.
+[add] Jump to position effect (Bxx) and Pattern break effect (Dxx) are now supported.
+[add] Key off effect (Kxx) is now supported.
+[add] Portamento to note volume column effect (Mx) is now supported.
+
+[bug] istruments specified 'alone' (with no note) in the pattern now shouldn't lead to unpredictable
+      results even when used when you never specified a note before in that channel.
+      Also, they should now work even after key-offs of instrument with no envelopes.
+[bug] effect Rxy (retrig note with volume slide) used at the same time when setting a volume on
+      the volume column now should correctly reset the volume before every every retrig.
+      'Memory effect', should work correctly now, even when only one of the values (x or y) is 0.
+[bug] effect 0xy (Arpeggio) now keeps on working even in the 'extra ticks' added by an effect EEx
+      (Pattern Delay) on the same line.
+[bug] effect 9xx (sample offset) is now not ignored when used with a sample that has a loop.
+[bug] libxm7 startSound() (internal) function has been renamed, so you don't have to rename yours.
+
+----- beta version 0.59 ----
+
+(this was the first release)
