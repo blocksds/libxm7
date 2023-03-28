@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+//
+// Copyright (c) 2018 sverx
+
 // Error defines:
 #define XM7_ERR_NOT_A_VALID_MODULE				0x01
 #define XM7_ERR_UNKNOWN_MODULE_VERSION			0x02

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: MIT
+//
+// Copyright (c) 2018 sverx
+
 #include <nds.h>
 #include <stdlib.h>
 #include "libxm7.h"
