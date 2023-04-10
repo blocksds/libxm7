@@ -44,4 +44,4 @@ install: all
 	@test $(INSTALLDIR_ABS)
 	$(V)$(RM) $(INSTALLDIR_ABS)
 	$(V)$(INSTALL) -d $(INSTALLDIR_ABS)
-	$(V)$(CP) -r include lib LICENSE $(INSTALLDIR_ABS)
+	$(V)$(CP) -r include lib COPYING $(INSTALLDIR_ABS)
