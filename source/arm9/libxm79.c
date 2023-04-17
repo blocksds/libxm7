@@ -82,10 +82,10 @@ u8 IdentifyMOD (char c1, char c2, char c3, char c4) {
     return (8);
     
   // FLT8 support (!!!)
-  if ((c1=='F') && (c2='L') && (c3='T') && (c4='8'))       // FLT8 [Startrekker]
+  if ((c1=='F') && (c2=='L') && (c3=='T') && (c4=='8'))       // FLT8 [Startrekker]
     return (8 | 0x80);
     
-  // if ((c1=='E') && (c2='X') && (c3='O') && (c4='8'))       // EXO8 (same as FLT8) (should be FM)
+  // if ((c1=='E') && (c2=='X') && (c3=='O') && (c4=='8'))       // EXO8 (same as FLT8) (should be FM)
   //   return (8 | 0x80);
     
     
