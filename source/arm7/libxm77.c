@@ -238,6 +238,8 @@ void XM7_lowlevel_pitchSound (int sampleRate, u8 channel) {
 
 void XM7_lowlevel_changeSample (const void* data, u32 looplength, u32 loopstart, u8 channel, u8 format) {
 
+  (void)format;
+
   // use channels starting from last!
   channel = 15 - channel;
   
@@ -821,6 +823,8 @@ u16 DecodeVolumeColumn (u8 chn, u8 volcmd, u8 curtick, u8 EDxInAction) {
 
 u16 DecodeBeforeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick) {
 
+  (void)chn;
+
   u16 resvalue=0;
   u8 tmpvalue;
   
@@ -1090,8 +1094,9 @@ u16 DecodeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick, u16 addtick) 
 	  }
 	  
 	  // volume slide performed by the following Axy command
-	  // NO BREAK;
-	  
+
+	  // fallthrough
+
 	case 0x6:
 	  // Performs vibrato with parameters initialized with 4xy or Sx+Vx
 	  // while sliding volume similarly to Axy volume slide.
@@ -1103,7 +1108,8 @@ u16 DecodeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick, u16 addtick) 
       }
       
 	  // volume slide performed by the following Axy command
-	  // NO BREAK;
+
+	  // fallthrough
 	  
 	case 0xa:
 	  // "Slides note volume up/down at speed x/y depending on which parameter is specified."
