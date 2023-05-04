@@ -125,10 +125,10 @@ XM7_SingleNoteArray_Type* PrepareNewPattern (u16 len, u8 chn) {
   if (ptr!=NULL) {
     for (i=0;i<cnt;i++) {
       ptr->Noteblock[i].Note=0x00;
-	  ptr->Noteblock[i].Instrument=0x00;
-	  ptr->Noteblock[i].Volume=0x00;
-	  ptr->Noteblock[i].EffectType=0x00;
-	  ptr->Noteblock[i].EffectParam=0x00;
+      ptr->Noteblock[i].Instrument=0x00;
+      ptr->Noteblock[i].Volume=0x00;
+      ptr->Noteblock[i].EffectType=0x00;
+      ptr->Noteblock[i].EffectParam=0x00;
     }
   }
 
@@ -168,16 +168,16 @@ XM7_Sample_Type* PrepareNewSample (u32 len, u32 looplen, u8 flags) {
 
     /*
     if ((flags & 0x10) == 0) {
-	  // 8 bit/sample
+      // 8 bit/sample
       malloclen += (looplen - 2);         // -2 samples because of the 1st and last which shouldn't be duplicated
-	} else {
-	  // 16 bit/sample
-	  malloclen += (looplen - 4);         // -2 samples (-4 bytes) because of the 1st and last which shouldn't be duplicated
-	}
+    } else {
+      // 16 bit/sample
+      malloclen += (looplen - 4);         // -2 samples (-4 bytes) because of the 1st and last which shouldn't be duplicated
+    }
 
-	*/
+    */
 
-	malloclen += looplen;         // adds the portion that gets reverted
+    malloclen += looplen;         // adds the portion that gets reverted
 
   }
 
@@ -197,11 +197,11 @@ XM7_Sample_Type* PrepareNewSample (u32 len, u32 looplen, u8 flags) {
 
       // set the name to empty
       memset (ptr->Name, 0, 22);   // 22 asciizero
-	} else {
-	  // SAMPLE memory not allocated, REMOVE the parent
-	  free (ptr);
+    } else {
+      // SAMPLE memory not allocated, REMOVE the parent
+      free (ptr);
       ptr=NULL;
-	}
+    }
   }
 
   return (ptr);
@@ -262,7 +262,7 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
     // check if the PATTERN header is ok
     if ((XMPatternHeader->HeaderLength!=9) || (XMPatternHeader->PackingType!=0)) {
       Module->NumberofPatterns = CurrentPattern;
-	  Module->NumberofInstruments = 0;
+      Module->NumberofInstruments = 0;
       Module->State = XM7_STATE_ERROR | XM7_ERR_UNSUPPORTED_PATTERN_HEADER;
       return (XM7_ERR_UNSUPPORTED_PATTERN_HEADER);
     }
@@ -270,7 +270,7 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
     // check if the PATTERN lenght is ok
     if ((XMPatternHeader->NumberofLinesinThisPattern<1) || (XMPatternHeader->NumberofLinesinThisPattern>256)) {
       Module->NumberofPatterns = CurrentPattern;
-	  Module->NumberofInstruments = 0;
+      Module->NumberofInstruments = 0;
       Module->State = XM7_STATE_ERROR | XM7_ERR_UNSUPPORTED_PATTERN_HEADER;
       return (XM7_ERR_UNSUPPORTED_PATTERN_HEADER);
     }
@@ -278,85 +278,85 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
     // pattern is ok! Get the length
     Module->PatternLength[CurrentPattern]=XMPatternHeader->NumberofLinesinThisPattern;
 
-	// Prepare an empty pattern for the data
-	Module->Pattern[CurrentPattern] = PrepareNewPattern (Module->PatternLength[CurrentPattern],Module->NumberofChannels);
-	if (Module->Pattern[CurrentPattern]==NULL) {
-	  Module->NumberofPatterns=CurrentPattern;
-	  Module->NumberofInstruments = 0;
-	  Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
-	  return (XM7_ERR_NOT_ENOUGH_MEMORY);
-	}
+    // Prepare an empty pattern for the data
+    Module->Pattern[CurrentPattern] = PrepareNewPattern (Module->PatternLength[CurrentPattern],Module->NumberofChannels);
+    if (Module->Pattern[CurrentPattern]==NULL) {
+      Module->NumberofPatterns=CurrentPattern;
+      Module->NumberofInstruments = 0;
+      Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
+      return (XM7_ERR_NOT_ENOUGH_MEMORY);
+    }
 
     // decode the PackedData
     u16 i=0;
-	u16 wholenote=0;
-	u8 firstbyte;
+    u16 wholenote=0;
+    u8 firstbyte;
 
-	XM7_SingleNoteArray_Type* thispattern=Module->Pattern[CurrentPattern];
+    XM7_SingleNoteArray_Type* thispattern=Module->Pattern[CurrentPattern];
 
     while (i<(XMPatternHeader->PackedPatterndataLength)) {
-	  firstbyte=XMPatternHeader->PatternData[i];
+      firstbyte=XMPatternHeader->PatternData[i];
 
-	  if (firstbyte & 0x80) {
-	    // it's compressed: skip to the next byte
-	  	i++;
+      if (firstbyte & 0x80) {
+        // it's compressed: skip to the next byte
+          i++;
       } else {
-	    // if "it's NOT compressed" then there are 5 bytes, simulate it's compressed with 5 bytes following
-		firstbyte=0x1F;
-	  }
-
-	  // if next is a NOTE:
-	  if (firstbyte & 0x01) {
-		// read the note
-		thispattern->Noteblock[wholenote].Note = XMPatternHeader->PatternData[i];
-		i++;
-	  }
-
-	  // if next is a INSTRUMENT:
-	  if (firstbyte & 0x02) {
-		// read the instrument
-		thispattern->Noteblock[wholenote].Instrument = XMPatternHeader->PatternData[i];
-		i++;
-	  }
-
-	  // if next is a VOLUME:
-	  if (firstbyte & 0x04) {
-	    // read the volume
-		thispattern->Noteblock[wholenote].Volume = XMPatternHeader->PatternData[i];
-		i++;
-	  }
-
-      // if next is an EFFECT TYPE:
-	  if (firstbyte & 0x08) {
-		// read the effect type
-		thispattern->Noteblock[wholenote].EffectType = XMPatternHeader->PatternData[i];
-		i++;
+        // if "it's NOT compressed" then there are 5 bytes, simulate it's compressed with 5 bytes following
+        firstbyte=0x1F;
       }
 
-	  // if next is an EFFECT PARAM:
-	  if (firstbyte & 0x10) {
-		// read the effect param
-		thispattern->Noteblock[wholenote].EffectParam = XMPatternHeader->PatternData[i];
-		i++;
-	  }
+      // if next is a NOTE:
+      if (firstbyte & 0x01) {
+        // read the note
+        thispattern->Noteblock[wholenote].Note = XMPatternHeader->PatternData[i];
+        i++;
+      }
 
-	  wholenote++;  // get ready for the next note
+      // if next is a INSTRUMENT:
+      if (firstbyte & 0x02) {
+        // read the instrument
+        thispattern->Noteblock[wholenote].Instrument = XMPatternHeader->PatternData[i];
+        i++;
+      }
+
+      // if next is a VOLUME:
+      if (firstbyte & 0x04) {
+        // read the volume
+        thispattern->Noteblock[wholenote].Volume = XMPatternHeader->PatternData[i];
+        i++;
+      }
+
+      // if next is an EFFECT TYPE:
+      if (firstbyte & 0x08) {
+        // read the effect type
+        thispattern->Noteblock[wholenote].EffectType = XMPatternHeader->PatternData[i];
+        i++;
+      }
+
+      // if next is an EFFECT PARAM:
+      if (firstbyte & 0x10) {
+        // read the effect param
+        thispattern->Noteblock[wholenote].EffectParam = XMPatternHeader->PatternData[i];
+        i++;
+      }
+
+      wholenote++;  // get ready for the next note
 
     } // end of patterndata
 
-	// if the pattern contains data...
-	if (XMPatternHeader->PackedPatterndataLength>0) {
-	  // ... check if the pattern contained all the notes it should!
-	  if (wholenote!=((Module->PatternLength[CurrentPattern]) * (Module->NumberofChannels))) {
-	  	Module->NumberofPatterns=CurrentPattern + 1;
-	    Module->NumberofInstruments = 0;
-	    Module->State = XM7_STATE_ERROR | XM7_ERR_INCOMPLETE_PATTERN;
+    // if the pattern contains data...
+    if (XMPatternHeader->PackedPatterndataLength>0) {
+      // ... check if the pattern contained all the notes it should!
+      if (wholenote!=((Module->PatternLength[CurrentPattern]) * (Module->NumberofChannels))) {
+          Module->NumberofPatterns=CurrentPattern + 1;
+        Module->NumberofInstruments = 0;
+        Module->State = XM7_STATE_ERROR | XM7_ERR_INCOMPLETE_PATTERN;
         return (XM7_ERR_INCOMPLETE_PATTERN);
-	  }
-	}
+      }
+    }
 
-	// get ready for next pattern!
-	XMPatternHeader = (XM7_XMPatternHeader_Type*) &(XMPatternHeader->PatternData[i]);
+    // get ready for next pattern!
+    XMPatternHeader = (XM7_XMPatternHeader_Type*) &(XMPatternHeader->PatternData[i]);
 
   }  // end 'pattern' for
 
@@ -379,9 +379,9 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
   for (CurrentInstrument=0;CurrentInstrument<((Module->NumberofInstruments));CurrentInstrument++) {
 
     // check if the INSTRUMENT header is ok  (I'm unsure of the header length...)
-	// NOTE: I've found some XM with HeaderLength!=0x107 and Type!=0 (Type=80) so I'm trashing the following check...
-	//       ... then found also type=anything which has meaning so really don't trust this 'Type' field
-	/*
+    // NOTE: I've found some XM with HeaderLength!=0x107 and Type!=0 (Type=80) so I'm trashing the following check...
+    //       ... then found also type=anything which has meaning so really don't trust this 'Type' field
+    /*
     if ((XMInstrument1Header->HeaderLength!=0x107) && (XMInstrument1Header->Type!=0)) {
       Module->State = STATE_ERROR | ERR_UNSUPPORTED_INSTRUMENT_HEADER;
       return (ERR_UNSUPPORTED_INSTRUMENT_HEADER);
@@ -390,74 +390,74 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
 
     // check if the INSTRUMENT lenght is ok  (max 16 samples!) (and can be ZERO!)
     if (XMInstrument1Header->NumberofSamples>16) {
-	  Module->NumberofInstruments = CurrentInstrument;
+      Module->NumberofInstruments = CurrentInstrument;
       Module->State = XM7_STATE_ERROR | XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER;
       return (XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER);
     }
 
-	// allocate the new instrument
-	Module->Instrument[CurrentInstrument] = PrepareNewInstrument ();
-	if (Module->Instrument[CurrentInstrument]==NULL) {
-	  Module->NumberofInstruments=CurrentInstrument;
-	  Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
-	  return (XM7_ERR_NOT_ENOUGH_MEMORY);
-	}
+    // allocate the new instrument
+    Module->Instrument[CurrentInstrument] = PrepareNewInstrument ();
+    if (Module->Instrument[CurrentInstrument]==NULL) {
+      Module->NumberofInstruments=CurrentInstrument;
+      Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
+      return (XM7_ERR_NOT_ENOUGH_MEMORY);
+    }
 
-	XM7_Instrument_Type* CurrentInstrumentPtr = Module->Instrument[CurrentInstrument];
+    XM7_Instrument_Type* CurrentInstrumentPtr = Module->Instrument[CurrentInstrument];
 
-	// load the info from the header
-	CurrentInstrumentPtr->NumberofSamples=XMInstrument1Header->NumberofSamples;
-	memcpy(CurrentInstrumentPtr->Name,XMInstrument1Header->Name,22);    // char[22]
+    // load the info from the header
+    CurrentInstrumentPtr->NumberofSamples=XMInstrument1Header->NumberofSamples;
+    memcpy(CurrentInstrumentPtr->Name,XMInstrument1Header->Name,22);    // char[22]
 
-	if (XMInstrument1Header->NumberofSamples>0) {
-	  // get the 2nd part of the header
-	  XM7_XMInstrument2ndHeader_Type* XMInstrument2Header = (XM7_XMInstrument2ndHeader_Type*) &(XMInstrument1Header->NextHeaderPart[0]);
+    if (XMInstrument1Header->NumberofSamples>0) {
+      // get the 2nd part of the header
+      XM7_XMInstrument2ndHeader_Type* XMInstrument2Header = (XM7_XMInstrument2ndHeader_Type*) &(XMInstrument1Header->NextHeaderPart[0]);
 
-	  // 2009! HNY!
-	  // check the length of the instrument header before proceed!
+      // 2009! HNY!
+      // check the length of the instrument header before proceed!
 
-	  if (XMInstrument1Header->InstrumentHeaderLength >= 33+96) {
-	    // copy the 96 notes' sample numbers
-	    memcpy (CurrentInstrumentPtr->SampleforNote,XMInstrument2Header->SampleforNotes,96);  // u8[96]
-	  } else {
+      if (XMInstrument1Header->InstrumentHeaderLength >= 33+96) {
+        // copy the 96 notes' sample numbers
+        memcpy (CurrentInstrumentPtr->SampleforNote,XMInstrument2Header->SampleforNotes,96);  // u8[96]
+      } else {
         // fill with 0 all the samples numbers
-      	memset (CurrentInstrumentPtr->SampleforNote,0,96);
+          memset (CurrentInstrumentPtr->SampleforNote,0,96);
       }
 
-	  // if (XMInstrument1Header->InstrumentHeaderLength >= 33+96+123) {
+      // if (XMInstrument1Header->InstrumentHeaderLength >= 33+96+123) {
       if (XMInstrument1Header->InstrumentHeaderLength >= 33+96+123-22) {
-	    // read all the data about Volume&Envelope points (the 22 'reserved' bytes can be absent)
-	    memcpy ((u8*)CurrentInstrumentPtr->VolumeEnvelopePoint,(u8*)XMInstrument2Header->VolumeEnvelopePoints,48);   // 12x2x2=u8[48]
-	    memcpy ((u8*)CurrentInstrumentPtr->PanningEnvelopePoint,(u8*)XMInstrument2Header->PanningEnvelopePoints,48); // 12x2x2=u8[48]
+        // read all the data about Volume&Envelope points (the 22 'reserved' bytes can be absent)
+        memcpy ((u8*)CurrentInstrumentPtr->VolumeEnvelopePoint,(u8*)XMInstrument2Header->VolumeEnvelopePoints,48);   // 12x2x2=u8[48]
+        memcpy ((u8*)CurrentInstrumentPtr->PanningEnvelopePoint,(u8*)XMInstrument2Header->PanningEnvelopePoints,48); // 12x2x2=u8[48]
 
-	    CurrentInstrumentPtr->NumberofVolumeEnvelopePoints=XMInstrument2Header->NumberofVolumePoints;
+        CurrentInstrumentPtr->NumberofVolumeEnvelopePoints=XMInstrument2Header->NumberofVolumePoints;
         CurrentInstrumentPtr->NumberofPanningEnvelopePoints=XMInstrument2Header->NumberofPanningPoints;
 
-	    CurrentInstrumentPtr->VolumeSustainPoint=XMInstrument2Header->VolumeSustainPoint;
-	    CurrentInstrumentPtr->VolumeLoopStartPoint=XMInstrument2Header->VolumeLoopStartPoint;
-	    CurrentInstrumentPtr->VolumeLoopEndPoint=XMInstrument2Header->VolumeLoopEndPoint;
+        CurrentInstrumentPtr->VolumeSustainPoint=XMInstrument2Header->VolumeSustainPoint;
+        CurrentInstrumentPtr->VolumeLoopStartPoint=XMInstrument2Header->VolumeLoopStartPoint;
+        CurrentInstrumentPtr->VolumeLoopEndPoint=XMInstrument2Header->VolumeLoopEndPoint;
 
-	    CurrentInstrumentPtr->PanningSustainPoint=XMInstrument2Header->PanningSustainPoint;
-	    CurrentInstrumentPtr->PanningLoopStartPoint=XMInstrument2Header->PanningLoopStartPoint;
-	    CurrentInstrumentPtr->PanningLoopEndPoint=XMInstrument2Header->PanningLoopEndPoint;
+        CurrentInstrumentPtr->PanningSustainPoint=XMInstrument2Header->PanningSustainPoint;
+        CurrentInstrumentPtr->PanningLoopStartPoint=XMInstrument2Header->PanningLoopStartPoint;
+        CurrentInstrumentPtr->PanningLoopEndPoint=XMInstrument2Header->PanningLoopEndPoint;
 
-	    CurrentInstrumentPtr->VolumeType=XMInstrument2Header->VolumeType;    //  bit 0: On; 1: Sustain; 2: Loop
-	    CurrentInstrumentPtr->PanningType=XMInstrument2Header->PanningType;  //  bit 0: On; 1: Sustain; 2: Loop
+        CurrentInstrumentPtr->VolumeType=XMInstrument2Header->VolumeType;    //  bit 0: On; 1: Sustain; 2: Loop
+        CurrentInstrumentPtr->PanningType=XMInstrument2Header->PanningType;  //  bit 0: On; 1: Sustain; 2: Loop
 
-	    // Instrument Vibrato
+        // Instrument Vibrato
         CurrentInstrumentPtr->VibratoType  = XMInstrument2Header->VibratoType;
         CurrentInstrumentPtr->VibratoSweep = 0x10000/(XMInstrument2Header->VibratoSweep+1);
         CurrentInstrumentPtr->VibratoDepth = XMInstrument2Header->VibratoDepth;
         CurrentInstrumentPtr->VibratoRate  = XMInstrument2Header->VibratoRate;
 
-	    // envelope volume fadeout
-	    CurrentInstrumentPtr->VolumeFadeout = XMInstrument2Header->VolumeFadeOut;
-	  } else {
+        // envelope volume fadeout
+        CurrentInstrumentPtr->VolumeFadeout = XMInstrument2Header->VolumeFadeOut;
+      } else {
         // there are NO envelopes in the file...
         CurrentInstrumentPtr->VolumeType  =0;
         CurrentInstrumentPtr->PanningType =0;
-	    CurrentInstrumentPtr->NumberofVolumeEnvelopePoints  =0;
-	    CurrentInstrumentPtr->NumberofPanningEnvelopePoints =0;
+        CurrentInstrumentPtr->NumberofVolumeEnvelopePoints  =0;
+        CurrentInstrumentPtr->NumberofPanningEnvelopePoints =0;
         // if there's no vibrato in the file...
         CurrentInstrumentPtr->VibratoType  =0;
         CurrentInstrumentPtr->VibratoSweep =0;
@@ -467,163 +467,163 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
         CurrentInstrumentPtr->VolumeFadeout =0;
       }
 
-	  // InstrumentHeader (2nd part) is finished!
-	  XM7_XMSampleHeader_Type* XMSampleHeader = (XM7_XMSampleHeader_Type*) ((u8*)&XMInstrument1Header->InstrumentHeaderLength + XMInstrument1Header->InstrumentHeaderLength);
+      // InstrumentHeader (2nd part) is finished!
+      XM7_XMSampleHeader_Type* XMSampleHeader = (XM7_XMSampleHeader_Type*) ((u8*)&XMInstrument1Header->InstrumentHeaderLength + XMInstrument1Header->InstrumentHeaderLength);
 
-	  u8 CurrentSample;
+      u8 CurrentSample;
 
-	  // read all the sample headers
-	  for (CurrentSample=0;CurrentSample<(CurrentInstrumentPtr->NumberofSamples);CurrentSample++) {
+      // read all the sample headers
+      for (CurrentSample=0;CurrentSample<(CurrentInstrumentPtr->NumberofSamples);CurrentSample++) {
 
-	    // allocate the new Sample
-	    CurrentInstrumentPtr->Sample[CurrentSample] = PrepareNewSample (XMSampleHeader->Length,
-		                                               XMSampleHeader->LoopLength, XMSampleHeader->Type);
+        // allocate the new Sample
+        CurrentInstrumentPtr->Sample[CurrentSample] = PrepareNewSample (XMSampleHeader->Length,
+                                                       XMSampleHeader->LoopLength, XMSampleHeader->Type);
         if (CurrentInstrumentPtr->Sample[CurrentSample]==NULL) {
-		  Module->NumberofInstruments = CurrentInstrument+1;
-	      CurrentInstrumentPtr->NumberofSamples=CurrentSample;
+          Module->NumberofInstruments = CurrentInstrument+1;
+          CurrentInstrumentPtr->NumberofSamples=CurrentSample;
           Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
-	      return (XM7_ERR_NOT_ENOUGH_MEMORY);
-	    }
+          return (XM7_ERR_NOT_ENOUGH_MEMORY);
+        }
 
-		XM7_Sample_Type* CurrentSamplePtr = CurrentInstrumentPtr->Sample[CurrentSample];
+        XM7_Sample_Type* CurrentSamplePtr = CurrentInstrumentPtr->Sample[CurrentSample];
 
-		// read all the data
-		CurrentSamplePtr->LoopStart  = XMSampleHeader->LoopStart;
-		CurrentSamplePtr->LoopLength = XMSampleHeader->LoopLength;
-		CurrentSamplePtr->Volume     = XMSampleHeader->Volume;
-		CurrentSamplePtr->FineTune   = XMSampleHeader->FineTune;
-		CurrentSamplePtr->Flags      = XMSampleHeader->Type;
-		// if loop type is 0x03 it becomes 'forward', because XMs shouldn't support 0x03 loops...
-		if ((CurrentSamplePtr->Flags & 0x0F) == 0x03)
-		  CurrentSamplePtr->Flags = (CurrentSamplePtr->Flags & 0xF0) | 0x01;
-		// end
-		CurrentSamplePtr->Panning      = XMSampleHeader->Panning;
-		CurrentSamplePtr->RelativeNote = XMSampleHeader->RelativeNote;
-		memcpy (CurrentSamplePtr->Name,XMSampleHeader->Name,22);    // char[22]
+        // read all the data
+        CurrentSamplePtr->LoopStart  = XMSampleHeader->LoopStart;
+        CurrentSamplePtr->LoopLength = XMSampleHeader->LoopLength;
+        CurrentSamplePtr->Volume     = XMSampleHeader->Volume;
+        CurrentSamplePtr->FineTune   = XMSampleHeader->FineTune;
+        CurrentSamplePtr->Flags      = XMSampleHeader->Type;
+        // if loop type is 0x03 it becomes 'forward', because XMs shouldn't support 0x03 loops...
+        if ((CurrentSamplePtr->Flags & 0x0F) == 0x03)
+          CurrentSamplePtr->Flags = (CurrentSamplePtr->Flags & 0xF0) | 0x01;
+        // end
+        CurrentSamplePtr->Panning      = XMSampleHeader->Panning;
+        CurrentSamplePtr->RelativeNote = XMSampleHeader->RelativeNote;
+        memcpy (CurrentSamplePtr->Name,XMSampleHeader->Name,22);    // char[22]
 
-		// point to the next sample header (or the 1st byte after all the headers...)
-		XMSampleHeader = (XM7_XMSampleHeader_Type*)  &(XMSampleHeader->NextHeader[0]);
-	  }
+        // point to the next sample header (or the 1st byte after all the headers...)
+        XMSampleHeader = (XM7_XMSampleHeader_Type*)  &(XMSampleHeader->NextHeader[0]);
+      }
 
-	  // the 1st byte after the header(s)... (both for the 8 and the 16 bit samples...)
-	  XM7_SampleData_Type* SampleData     = (XM7_SampleData_Type*) XMSampleHeader;
-	  XM7_SampleData16_Type* SampleData16 = (XM7_SampleData16_Type*) XMSampleHeader;
+      // the 1st byte after the header(s)... (both for the 8 and the 16 bit samples...)
+      XM7_SampleData_Type* SampleData     = (XM7_SampleData_Type*) XMSampleHeader;
+      XM7_SampleData16_Type* SampleData16 = (XM7_SampleData16_Type*) XMSampleHeader;
 
-	  // read all the sample data
-	  for (CurrentSample=0;CurrentSample<(CurrentInstrumentPtr->NumberofSamples);CurrentSample++) {
+      // read all the sample data
+      for (CurrentSample=0;CurrentSample<(CurrentInstrumentPtr->NumberofSamples);CurrentSample++) {
 
-	    // get a pointer to the data space
-		XM7_Sample_Type* CurrentSamplePtr = CurrentInstrumentPtr->Sample[CurrentSample];
-		XM7_SampleData_Type*   CurrentSampleDataPtr   = (XM7_SampleData_Type*)   CurrentSamplePtr->SampleData;
-		XM7_SampleData16_Type* CurrentSampleData16Ptr = (XM7_SampleData16_Type*) CurrentSamplePtr->SampleData;
+        // get a pointer to the data space
+        XM7_Sample_Type* CurrentSamplePtr = CurrentInstrumentPtr->Sample[CurrentSample];
+        XM7_SampleData_Type*   CurrentSampleDataPtr   = (XM7_SampleData_Type*)   CurrentSamplePtr->SampleData;
+        XM7_SampleData16_Type* CurrentSampleData16Ptr = (XM7_SampleData16_Type*) CurrentSamplePtr->SampleData;
 
-		// read the sample, finally!
+        // read the sample, finally!
 
-		// check if sample is 8 or 16 bit first!
-		u32 i,j;
-		if ((CurrentSamplePtr->Flags & 0x10)==0) {
-		  // it's an 8 bit sample
-		  s8 old=0;
-		  for (i=0;i<CurrentSamplePtr->Length;i++) {
-		    // samples in XM files are stored as delta value (nobody knows why...)
-		    old+=SampleData->Data[i];
-		    CurrentSampleDataPtr->Data[i]=old;
-		  }
+        // check if sample is 8 or 16 bit first!
+        u32 i,j;
+        if ((CurrentSamplePtr->Flags & 0x10)==0) {
+          // it's an 8 bit sample
+          s8 old=0;
+          for (i=0;i<CurrentSamplePtr->Length;i++) {
+            // samples in XM files are stored as delta value (nobody knows why...)
+            old+=SampleData->Data[i];
+            CurrentSampleDataPtr->Data[i]=old;
+          }
 
-		  // ping-pong loop conversion START
-		  // since DS has got no support for ping/pong loop, we should duplicate the loop backward
-		  if ((CurrentSamplePtr->Flags & 0x03) == 0x02)
-		  {
+          // ping-pong loop conversion START
+          // since DS has got no support for ping/pong loop, we should duplicate the loop backward
+          if ((CurrentSamplePtr->Flags & 0x03) == 0x02)
+          {
 
-		    /*
-		    for (j=0;j<(CurrentSamplePtr->LoopLength-2);j++) {
-		      CurrentSampleDataPtr->Data[CurrentSamplePtr->Length+j] = CurrentSampleDataPtr->Data[(CurrentSamplePtr->Length-1)-j];
-		    }
-			*/
+            /*
+            for (j=0;j<(CurrentSamplePtr->LoopLength-2);j++) {
+              CurrentSampleDataPtr->Data[CurrentSamplePtr->Length+j] = CurrentSampleDataPtr->Data[(CurrentSamplePtr->Length-1)-j];
+            }
+            */
 
-			for (j=0;j<CurrentSamplePtr->LoopLength;j++)
-		      CurrentSampleDataPtr->Data[CurrentSamplePtr->Length+j] = CurrentSampleDataPtr->Data[CurrentSamplePtr->Length-j];
+            for (j=0;j<CurrentSamplePtr->LoopLength;j++)
+              CurrentSampleDataPtr->Data[CurrentSamplePtr->Length+j] = CurrentSampleDataPtr->Data[CurrentSamplePtr->Length-j];
 
-			// and change it to a 'normal' loop (preserving 16 bit flag)
-		    CurrentSamplePtr->Flags = (CurrentSamplePtr->Flags & 0xF0) | 0x01;
+            // and change it to a 'normal' loop (preserving 16 bit flag)
+            CurrentSamplePtr->Flags = (CurrentSamplePtr->Flags & 0xF0) | 0x01;
 
-			// the lenght of the sample must be changed
-			// CurrentSamplePtr->Length += (CurrentSamplePtr->LoopLength - 2);
-			CurrentSamplePtr->Length += CurrentSamplePtr->LoopLength;
+            // the lenght of the sample must be changed
+            // CurrentSamplePtr->Length += (CurrentSamplePtr->LoopLength - 2);
+            CurrentSamplePtr->Length += CurrentSamplePtr->LoopLength;
 
-			// of course also LoopLength has to be changed!
-			CurrentSamplePtr->LoopLength += CurrentSamplePtr->LoopLength;
-		  }
-		  // ping-pong loop conversion FINISHED
+            // of course also LoopLength has to be changed!
+            CurrentSamplePtr->LoopLength += CurrentSamplePtr->LoopLength;
+          }
+          // ping-pong loop conversion FINISHED
 
 
-		  // prepare for the next sample (both pointers!)
-		  SampleData   = (XM7_SampleData_Type*) &(SampleData->Data[i]);
+          // prepare for the next sample (both pointers!)
+          SampleData   = (XM7_SampleData_Type*) &(SampleData->Data[i]);
           SampleData16 = (XM7_SampleData16_Type*) SampleData;
 
-		} else {
-		  // it's a 16 bit sample
-		  s16 old16=0;
-		  for (i=0;(i<CurrentSamplePtr->Length>>1); i++) {  // lenght is in bytes anyway
+        } else {
+          // it's a 16 bit sample
+          s16 old16=0;
+          for (i=0;(i<CurrentSamplePtr->Length>>1); i++) {  // lenght is in bytes anyway
             old16+=SampleData16->Data[i];
-		    CurrentSampleData16Ptr->Data[i]=old16;
-		  }
+            CurrentSampleData16Ptr->Data[i]=old16;
+          }
 
-		  // ping-pong loop conversion START
-		  // since DS has got no support for ping/pong loop, we should duplicate the loop backward
-		  if ((CurrentSamplePtr->Flags & 0x03) == 0x02)
-		  {
+          // ping-pong loop conversion START
+          // since DS has got no support for ping/pong loop, we should duplicate the loop backward
+          if ((CurrentSamplePtr->Flags & 0x03) == 0x02)
+          {
 
-		    /*
-		    for (j=0;j<((CurrentSamplePtr->LoopLength >> 1) -2);j++) {  // -2 because we won't duplicate 1st and last
-		      CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1) +j] = CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1)-(j+1)];
-		    }
-			*/
+            /*
+            for (j=0;j<((CurrentSamplePtr->LoopLength >> 1) -2);j++) {  // -2 because we won't duplicate 1st and last
+              CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1) +j] = CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1)-(j+1)];
+            }
+            */
 
-			for (j=0;j<(CurrentSamplePtr->LoopLength >> 1);j++)
-		      CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1) +j] = CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1)-j];
+            for (j=0;j<(CurrentSamplePtr->LoopLength >> 1);j++)
+              CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1) +j] = CurrentSampleData16Ptr->Data[(CurrentSamplePtr->Length >> 1)-j];
 
-			// and change it to a 'normal' loop (preserving 16 bit flag)
-		    CurrentSamplePtr->Flags = (CurrentSamplePtr->Flags & 0xF0) | 0x01;
+            // and change it to a 'normal' loop (preserving 16 bit flag)
+            CurrentSamplePtr->Flags = (CurrentSamplePtr->Flags & 0xF0) | 0x01;
 
-			// the lenght of the sample must be changed (it's in bytes)
-			// CurrentSamplePtr->Length += (CurrentSamplePtr->LoopLength - 4);
-			CurrentSamplePtr->Length += CurrentSamplePtr->LoopLength;
+            // the lenght of the sample must be changed (it's in bytes)
+            // CurrentSamplePtr->Length += (CurrentSamplePtr->LoopLength - 4);
+            CurrentSamplePtr->Length += CurrentSamplePtr->LoopLength;
 
-			// of course also LoopLength has to be changed! (it's in bytes)
-			// CurrentSamplePtr->LoopLength += (CurrentSamplePtr->LoopLength - 4);
-			CurrentSamplePtr->LoopLength += CurrentSamplePtr->LoopLength;
-		  }
-		  // ping-pong loop conversion FINISHED
+            // of course also LoopLength has to be changed! (it's in bytes)
+            // CurrentSamplePtr->LoopLength += (CurrentSamplePtr->LoopLength - 4);
+            CurrentSamplePtr->LoopLength += CurrentSamplePtr->LoopLength;
+          }
+          // ping-pong loop conversion FINISHED
 
-		  // prepare for the next sample (both pointers!)
-		  SampleData16 = (XM7_SampleData16_Type*) &(SampleData16->Data[i]);
+          // prepare for the next sample (both pointers!)
+          SampleData16 = (XM7_SampleData16_Type*) &(SampleData16->Data[i]);
           SampleData   = (XM7_SampleData_Type*) SampleData16;
-		}
+        }
 
-	  }   // finished reading all the samples
+      }   // finished reading all the samples
 
-	  // prepare for the next instrument (the next byte after the last sample
-	  XMInstrument1Header = (XM7_XMInstrument1stHeader_Type*)SampleData;
+      // prepare for the next instrument (the next byte after the last sample
+      XMInstrument1Header = (XM7_XMInstrument1stHeader_Type*)SampleData;
 
-	  // end if  (samples>0)
+      // end if  (samples>0)
     } else {
-	  // if (samples=0)
-	  // should be like this...
-	  // XMInstrument1Header = (XMInstrument1stHeader_Type*) &(XMInstrument1Header->NextHeaderPart[0]);
+      // if (samples=0)
+      // should be like this...
+      // XMInstrument1Header = (XMInstrument1stHeader_Type*) &(XMInstrument1Header->NextHeaderPart[0]);
 
-	  // ...but it seems like THERE IS the 2nd header too even when NO samples...
-	  // get the 2nd part of the header
+      // ...but it seems like THERE IS the 2nd header too even when NO samples...
+      // get the 2nd part of the header
 
-	  // NOTE: I've found some XM with instruments with 0 samples so I trash the following 2 lines
-	  /*
-	  XMInstrument2ndHeader_Type* XMInstrument2Header = (XMInstrument2ndHeader_Type*) &(XMInstrument1Header->NextHeaderPart[0]);
-	  XMInstrument1Header = (XMInstrument1stHeader_Type*) &(XMInstrument2Header->NextDataPart[0]);
-	  */
+      // NOTE: I've found some XM with instruments with 0 samples so I trash the following 2 lines
+      /*
+      XMInstrument2ndHeader_Type* XMInstrument2Header = (XMInstrument2ndHeader_Type*) &(XMInstrument1Header->NextHeaderPart[0]);
+      XMInstrument1Header = (XMInstrument1stHeader_Type*) &(XMInstrument2Header->NextDataPart[0]);
+      */
 
-	  XMInstrument1Header = (XM7_XMInstrument1stHeader_Type*) &(XMInstrument1Header->NextHeaderPart[(XMInstrument1Header->InstrumentHeaderLength)-(sizeof(XM7_XMInstrument1stHeader_Type))+1]);
+      XMInstrument1Header = (XM7_XMInstrument1stHeader_Type*) &(XMInstrument1Header->NextHeaderPart[(XMInstrument1Header->InstrumentHeaderLength)-(sizeof(XM7_XMInstrument1stHeader_Type))+1]);
 
-	}
+    }
   }  // end "for Instruments"
 
   // Set standard panning
@@ -657,16 +657,16 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
   if (Module->NumberofChannels==0) {
     Module->NumberofInstruments = 0;
     Module->NumberofPatterns = 0;
-	Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_A_VALID_MODULE;
-	return (XM7_ERR_NOT_A_VALID_MODULE);
+    Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_A_VALID_MODULE;
+    return (XM7_ERR_NOT_A_VALID_MODULE);
   }
 
   // if MOD has too many channels:
   if (Module->NumberofChannels>16) {
     Module->NumberofInstruments = 0;
     Module->NumberofPatterns = 0;
-	Module->State = XM7_STATE_ERROR | XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS;
-	return (XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS);
+    Module->State = XM7_STATE_ERROR | XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS;
+    return (XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS);
   }
 
   // set these values, constants in a MOD file
@@ -707,19 +707,19 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
     if (SwapBytes(MODModule->Instrument[CurrentInstrument].Length)>1) {
 
       // allocate the new instrument
-	  Module->Instrument[CurrentInstrument] = PrepareNewInstrument ();
-	  if (Module->Instrument[CurrentInstrument]==NULL) {
-	    Module->NumberofInstruments=CurrentInstrument;
+      Module->Instrument[CurrentInstrument] = PrepareNewInstrument ();
+      if (Module->Instrument[CurrentInstrument]==NULL) {
+        Module->NumberofInstruments=CurrentInstrument;
         Module->NumberofPatterns = 0;
-	    Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
-	    return (XM7_ERR_NOT_ENOUGH_MEMORY);
-	  }
+        Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
+        return (XM7_ERR_NOT_ENOUGH_MEMORY);
+      }
 
-  	  XM7_Instrument_Type* CurrentInstrumentPtr = Module->Instrument[CurrentInstrument];
+        XM7_Instrument_Type* CurrentInstrumentPtr = Module->Instrument[CurrentInstrument];
 
-	  // load the info from the header
-	  CurrentInstrumentPtr->NumberofSamples=1;
-	  memcpy(CurrentInstrumentPtr->Name,MODModule->Instrument[CurrentInstrument].Name,22);    // char[22]
+      // load the info from the header
+      CurrentInstrumentPtr->NumberofSamples=1;
+      memcpy(CurrentInstrumentPtr->Name,MODModule->Instrument[CurrentInstrument].Name,22);    // char[22]
 
       // no multisample, it's a MOD
       memset (CurrentInstrumentPtr->SampleforNote,0,96);
@@ -727,8 +727,8 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
       // NO envelopes in a MOD
       CurrentInstrumentPtr->VolumeType  =0;
       CurrentInstrumentPtr->PanningType =0;
-	  CurrentInstrumentPtr->NumberofVolumeEnvelopePoints  =0;
-	  CurrentInstrumentPtr->NumberofPanningEnvelopePoints =0;
+      CurrentInstrumentPtr->NumberofVolumeEnvelopePoints  =0;
+      CurrentInstrumentPtr->NumberofPanningEnvelopePoints =0;
 
       // NO auto vibrato in a MOD
       CurrentInstrumentPtr->VibratoType  =0;
@@ -740,19 +740,19 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
       CurrentInstrumentPtr->VolumeFadeout =0;
 
       // allocate space for the (only) sample
-	  CurrentInstrumentPtr->Sample[0] = PrepareNewSample (SwapBytes(MODModule->Instrument[CurrentInstrument].Length)*2,
+      CurrentInstrumentPtr->Sample[0] = PrepareNewSample (SwapBytes(MODModule->Instrument[CurrentInstrument].Length)*2,
                                                            SwapBytes(MODModule->Instrument[CurrentInstrument].LoopLength)*2, 0);
 
       if (CurrentInstrumentPtr->Sample[0]==NULL) {
-	    Module->NumberofInstruments = CurrentInstrument+1;
+        Module->NumberofInstruments = CurrentInstrument+1;
         Module->NumberofPatterns = 0;
         Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
-	    return (XM7_ERR_NOT_ENOUGH_MEMORY);
-	  }
+        return (XM7_ERR_NOT_ENOUGH_MEMORY);
+      }
 
-	  XM7_Sample_Type* CurrentSamplePtr = CurrentInstrumentPtr->Sample[0];
+      XM7_Sample_Type* CurrentSamplePtr = CurrentInstrumentPtr->Sample[0];
 
-	  // read all the data
+      // read all the data
       CurrentSamplePtr->Length     = SwapBytes(MODModule->Instrument[CurrentInstrument].Length)*2;
       u8 TmpFineTune   = MODModule->Instrument[CurrentInstrument].FineTune & 0x0F;
 
@@ -762,9 +762,9 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
       else
         CurrentSamplePtr->FineTune = -(16-TmpFineTune)*16;
 
-	  CurrentSamplePtr->Volume     = MODModule->Instrument[CurrentInstrument].Volume;
-	  CurrentSamplePtr->LoopStart  = SwapBytes(MODModule->Instrument[CurrentInstrument].LoopStart)*2;
-	  CurrentSamplePtr->LoopLength = SwapBytes(MODModule->Instrument[CurrentInstrument].LoopLength)*2;
+      CurrentSamplePtr->Volume     = MODModule->Instrument[CurrentInstrument].Volume;
+      CurrentSamplePtr->LoopStart  = SwapBytes(MODModule->Instrument[CurrentInstrument].LoopStart)*2;
+      CurrentSamplePtr->LoopLength = SwapBytes(MODModule->Instrument[CurrentInstrument].LoopLength)*2;
 
       // stupid MOD bug PATCH: if LoopLength is 2 then there's really NO loop.
       if (CurrentSamplePtr->LoopLength==2)
@@ -773,7 +773,7 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
       CurrentSamplePtr->Flags      = (CurrentSamplePtr->LoopLength>0)?1:0;  // 8 bit, forward loop
 
       CurrentSamplePtr->Panning      = 0x80;  // default: center (there's no pan in mod samples)
-	  CurrentSamplePtr->RelativeNote = 0;     // there's no such thing in MOD
+      CurrentSamplePtr->RelativeNote = 0;     // there's no such thing in MOD
 
       // copy instrument name in sample name
       memcpy (CurrentSamplePtr->Name,CurrentInstrumentPtr->Name,22);    // char[22]
@@ -793,13 +793,13 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
     // Set pattern length (always 64 in MOD)
     Module->PatternLength[CurrentPattern]=64;
 
-	// Prepare an empty pattern for the data
-	Module->Pattern[CurrentPattern] = PrepareNewPattern (Module->PatternLength[CurrentPattern],Module->NumberofChannels);
-	if (Module->Pattern[CurrentPattern]==NULL) {
-	  Module->NumberofPatterns=CurrentPattern;
-	  Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
-	  return (XM7_ERR_NOT_ENOUGH_MEMORY);
-	}
+    // Prepare an empty pattern for the data
+    Module->Pattern[CurrentPattern] = PrepareNewPattern (Module->PatternLength[CurrentPattern],Module->NumberofChannels);
+    if (Module->Pattern[CurrentPattern]==NULL) {
+      Module->NumberofPatterns=CurrentPattern;
+      Module->State = XM7_STATE_ERROR | XM7_ERR_NOT_ENOUGH_MEMORY;
+      return (XM7_ERR_NOT_ENOUGH_MEMORY);
+    }
 
     XM7_SingleNoteArray_Type* thispattern=Module->Pattern[CurrentPattern];
 
@@ -871,19 +871,19 @@ void XM7_UnloadXM (XM7_ModuleManager_Type* Module)
   for (i=(Module->NumberofInstruments-1);i>=0;i--) {
     CurrentInstrumentPtr = Module->Instrument[i];
 
-	// samples, from last to first
+    // samples, from last to first
     for (j=(CurrentInstrumentPtr->NumberofSamples-1);j>=0;j--) {
-	   CurrentSamplePtr = CurrentInstrumentPtr->Sample[j];
+       CurrentSamplePtr = CurrentInstrumentPtr->Sample[j];
 
-	   // remove sample data
-	   free (CurrentSamplePtr->SampleData);
+       // remove sample data
+       free (CurrentSamplePtr->SampleData);
 
-	   // remove sample info
-	   free (CurrentSamplePtr);
-	}
+       // remove sample info
+       free (CurrentSamplePtr);
+    }
 
-	// remove instrument
-	free (CurrentInstrumentPtr);
+    // remove instrument
+    free (CurrentInstrumentPtr);
   }
 
   // remove patterns
