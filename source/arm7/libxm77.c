@@ -2,9 +2,11 @@
 //
 // Copyright (c) 2018 sverx
 
-#include <nds.h>
 #include <stdlib.h>
-#include "libxm7.h"
+
+#include <nds.h>
+
+#include <libxm7.h>
 
 // these are the variables I need to make the module play!
 XM7_ModuleManager_Type* XM7_TheModule;

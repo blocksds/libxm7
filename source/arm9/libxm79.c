@@ -2,11 +2,12 @@
 //
 // Copyright (c) 2018 sverx
 
-#include <nds.h>
-#include <stdlib.h>  // for malloc()
-#include <string.h>  // for memcpy(), memcmp()
+#include <stdlib.h>
+#include <string.h>
 
-#include "libxm7.h"
+#include <nds.h>
+
+#include <libxm7.h>
 
 // MOD octave 0 difference
 #define AMIGABASEOCTAVE 2
