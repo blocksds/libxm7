@@ -160,7 +160,7 @@ static void XM7_lowlevel_stopSound(u8 channel)
   channel = 15 - channel;
   SCHANNEL_CR(channel) = 0;
 }
-
+/*
 static void XM7_lowlevel_pauseSound(u8 channel)
 {
   // use channels starting from last!
@@ -174,7 +174,7 @@ static void XM7_lowlevel_resumeSound(u8 channel)
   channel = 15 - channel;
   SCHANNEL_CR(channel) |= SCHANNEL_ENABLE;
 }
-
+*/
 static void XM7_lowlevel_startSound(int sampleRate, const void* data, u32 length, u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
 {
   // use channels starting from last!
