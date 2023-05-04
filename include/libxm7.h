@@ -387,6 +387,7 @@ typedef struct {
 
 // end of MOD section
 
+#ifdef ARM7
 
 // ARM7 functions
 void XM7_Initialize(void);
@@ -394,6 +395,7 @@ void XM7_PlayModule(XM7_ModuleManager_Type* TheModule);
 void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position);
 void XM7_StopModule(void);
 
+#endif // ARM7
 
 // ARM9 functions (... well, you can use them even on ARM7 if you want...)
 u16 XM7_LoadXM(XM7_ModuleManager_Type*, XM7_XMModuleHeader_Type*);
