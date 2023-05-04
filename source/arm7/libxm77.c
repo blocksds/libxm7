@@ -58,16 +58,16 @@ u16 VeryFineTunes [129];
 // u8 RealPanning [129];   // indexes [0..128], values from [0..0x80]
 // will be calculated by Pan Aperture
 
-#define YES                1
-#define NO                0
+#define YES                 1
+#define NO                  0
 
 #define ENVELOPE_NONE       0
 #define ENVELOPE_ATTACK     1
 #define ENVELOPE_SUSTAIN    2
 #define ENVELOPE_RELEASE    3
 
-void CalculateVeryFineTunes () {
-
+static void CalculateVeryFineTunes(void)
+{
   u8 i,j;
 
   for (i=0;i<=128;i++) {
@@ -82,8 +82,8 @@ void CalculateVeryFineTunes () {
 }
 
 
-u16 GetAmigaPeriod (u8 note) {  // note from 0 to 95
-
+static u16 GetAmigaPeriod(u8 note) // note from 0 to 95
+{
   u16 period = AmigaPeriods[note % 12];
   int octave = (note / 12) - AMIGABASEOCTAVE;
 
@@ -95,7 +95,8 @@ u16 GetAmigaPeriod (u8 note) {  // note from 0 to 95
   return(period);
 }
 
-u8 FindClosestNoteToAmigaPeriod (u16 period) {  // note from 0 to 95
+static u8 FindClosestNoteToAmigaPeriod(u16 period) // note from 0 to 95
+{
   u8 note=0;
   u16 bottomperiod;
   u16 topperiod;
@@ -123,8 +124,8 @@ u8 FindClosestNoteToAmigaPeriod (u16 period) {  // note from 0 to 95
 }
 
 /*
-void CalculateRealPanningArray (u8 halfvalue) {   // halfvalue = 0..128
-
+static void CalculateRealPanningArray(u8 halfvalue) // halfvalue = 0..128
+{
   u8 i,j,k;
 
   // resets values
@@ -153,29 +154,29 @@ void CalculateRealPanningArray (u8 halfvalue) {   // halfvalue = 0..128
 }
 */
 
-void XM7_lowlevel_stopSound(u8 channel) {
-
+static void XM7_lowlevel_stopSound(u8 channel)
+{
   // use channels starting from last!
   channel = 15 - channel;
   SCHANNEL_CR(channel) = 0;
 }
 
-void XM7_lowlevel_pauseSound(u8 channel) {
-
+static void XM7_lowlevel_pauseSound(u8 channel)
+{
   // use channels starting from last!
   channel = 15 - channel;
   SCHANNEL_CR(channel) &= ~SCHANNEL_ENABLE;
 }
 
-void XM7_lowlevel_resumeSound(u8 channel) {
-
+static void XM7_lowlevel_resumeSound(u8 channel)
+{
   // use channels starting from last!
   channel = 15 - channel;
   SCHANNEL_CR(channel) |= SCHANNEL_ENABLE;
 }
 
-void XM7_lowlevel_startSound (int sampleRate, const void* data, u32 length, u8 channel, u8 vol, u8 pan, u8 format, u32 offset) {
-
+static void XM7_lowlevel_startSound(int sampleRate, const void* data, u32 length, u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
+{
   // use channels starting from last!
   channel = 15 - channel;
 
@@ -192,8 +193,8 @@ void XM7_lowlevel_startSound (int sampleRate, const void* data, u32 length, u8 c
   }
 }
 
-void XM7_lowlevel_startSoundwLoop (int sampleRate, const void* data, u32 looplength, u32 loopstart, u8 channel, u8 vol, u8 pan, u8 format, u32 offset) {
-
+static void XM7_lowlevel_startSoundwLoop(int sampleRate, const void* data, u32 looplength, u32 loopstart, u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
+{
   // use channels starting from last!
   channel = 15 - channel;
 
@@ -215,8 +216,8 @@ void XM7_lowlevel_startSoundwLoop (int sampleRate, const void* data, u32 looplen
   }
 }
 
-void XM7_lowlevel_setVolumeandPanning (u8 channel, u8 vol,  u8 pan) {
-
+static void XM7_lowlevel_setVolumeandPanning(u8 channel, u8 vol, u8 pan)
+{
   // use channels starting from last!
   channel = 15 - channel;
 
@@ -224,8 +225,8 @@ void XM7_lowlevel_setVolumeandPanning (u8 channel, u8 vol,  u8 pan) {
   SCHANNEL_PAN (channel) = (pan & 0x7f);
 }
 
-void XM7_lowlevel_pitchSound (int sampleRate, u8 channel) {
-
+static void XM7_lowlevel_pitchSound (int sampleRate, u8 channel)
+{
   // use channels starting from last!
   channel = 15 - channel;
 
@@ -233,11 +234,11 @@ void XM7_lowlevel_pitchSound (int sampleRate, u8 channel) {
 }
 
 // define this to access the higherbyte of SCHANNEL_CR
-#define SCHANNEL_CR_HIGHERBYTE(n)    (*(vu8*)(0x04000403 + ((n)<<4)))
+#define SCHANNEL_CR_HIGHERBYTE(n)   (*(vu8*)(0x04000403 + ((n)<<4)))
 #define SCHANNEL_CR_SHIFTBITS       24
 
-void XM7_lowlevel_changeSample (const void* data, u32 looplength, u32 loopstart, u8 channel, u8 format) {
-
+static void XM7_lowlevel_changeSample(const void* data, u32 looplength, u32 loopstart, u8 channel, u8 format)
+{
   (void)format;
 
   // use channels starting from last!
@@ -251,8 +252,8 @@ void XM7_lowlevel_changeSample (const void* data, u32 looplength, u32 loopstart,
   // SCHANNEL_CR_HIGHERBYTE (channel) = (SCHANNEL_ENABLE | SOUND_REPEAT | (format?SOUND_FORMAT_16BIT:SOUND_FORMAT_8BIT)) >> SCHANNEL_CR_SHIFTBITS;
 }
 
-void SetTimerSpeedBPM (u8 BPM) {
-
+static void SetTimerSpeedBPM(u8 BPM)
+{
   // calculate the main timer freq
   // - the freq is 33.513.982 Hz, when prescaler is F/1024 then it's 32.728,5 Hz (circa)
   // = 1.963.710 clicks/minute , then divided by 6 because there are 6 ticks/line
@@ -267,7 +268,8 @@ void SetTimerSpeedBPM (u8 BPM) {
   TIMER1_CR |= TIMER_ENABLE;
 }
 
-u8 CalculateFinalVolume (u8 samplevol, u8 envelopevol, u16 fadeoutvol) {
+static u8 CalculateFinalVolume(u8 samplevol, u8 envelopevol, u16 fadeoutvol)
+{
   // gives back [0x00-0x7f]
   // FinalVol=(FadeOutVol/32768)*(EnvelopeVol/64)*(GlobalVol/64)*(Vol/64)*Scale;
   // scale is 0x80
@@ -281,7 +283,8 @@ u8 CalculateFinalVolume (u8 samplevol, u8 envelopevol, u16 fadeoutvol) {
   return (tmpvol);
 }
 
-u8 CalculateFinalPanning (u8 chn, u8 samplepan, u8 envelopepan) {
+static u8 CalculateFinalPanning(u8 chn, u8 samplepan, u8 envelopepan)
+{
   // gives back [0x00-0x7f]
   // FinalPan=Pan+(EnvelopePan-32)*(128-Abs(Pan-128))/32;
   // return is UNSIGNED 0..127
@@ -314,7 +317,8 @@ u8 CalculateFinalPanning (u8 chn, u8 samplepan, u8 envelopepan) {
   return (res);
 }
 
-void SlideSampleVolume (u8 chn, s8 change) {
+static void SlideSampleVolume(u8 chn, s8 change)
+{
   // change is -0x40 ... 0x40
   if (change>0) {
     XM7_TheModule->CurrentSampleVolume[chn] += change;
@@ -328,7 +332,8 @@ void SlideSampleVolume (u8 chn, s8 change) {
   }
 }
 
-void SlideSamplePan (u8 chn, s8 change) {
+static void SlideSamplePan(u8 chn, s8 change)
+{
   // change is -0x0f ... 0x0f
   if (change>0) {
     // pan RIGHT
@@ -345,7 +350,8 @@ void SlideSamplePan (u8 chn, s8 change) {
   }
 }
 
-void ChangeVolumeonRetrigTable (u8 chn, u8 param) {
+static void ChangeVolumeonRetrigTable(u8 chn, u8 param)
+{
   switch (param) {
     case 0:
     case 8: break;
@@ -374,8 +380,8 @@ void ChangeVolumeonRetrigTable (u8 chn, u8 param) {
   }
 }
 
-void ApplyVolumeandPanning (u8 chn) {
-
+static void ApplyVolumeandPanning(u8 chn)
+{
   u8 volume = XM7_TheModule->CurrentSampleVolume [chn];
   s8 tremolo = XM7_TheModule->CurrentTremoloVolume [chn];
   u8 tremormute = XM7_TheModule->CurrentTremorMuting [chn];
@@ -409,15 +415,16 @@ void ApplyVolumeandPanning (u8 chn) {
   XM7_lowlevel_setVolumeandPanning (chn,volume,panning);
 }
 
-void ApplyNewGlobalVolume (void) {
+static void ApplyNewGlobalVolume(void)
+{
   u8 chn;
   // for every channel
   for (chn=0;chn<(XM7_TheModule->NumberofChannels);chn++)
     ApplyVolumeandPanning (chn);
 }
 
-void CalculateEnvelopeVolume (u8 chn, u8 instrument) {
-
+static void CalculateEnvelopeVolume(u8 chn, u8 instrument)
+{
   u16 i,j, x1=0,x2=0, y1=0,y2=0;
   XM7_Instrument_Type* CurrInstr = XM7_TheModule->Instrument[instrument-1];
 
@@ -451,8 +458,8 @@ void CalculateEnvelopeVolume (u8 chn, u8 instrument) {
   }
 }
 
-void CalculateEnvelopePanning (u8 chn, u8 instrument) {
-
+static void CalculateEnvelopePanning(u8 chn, u8 instrument)
+{
   u16 i,j, x1=0,x2=0, y1=0,y2=0;
   XM7_Instrument_Type* CurrInstr = XM7_TheModule->Instrument[instrument-1];
 
@@ -486,8 +493,8 @@ void CalculateEnvelopePanning (u8 chn, u8 instrument) {
   }
 }
 
-void StartEnvelope (u8 chn, u8 startpoint) {
-
+static void StartEnvelope(u8 chn, u8 startpoint)
+{
   // we need to start an envelope, if needed
   // check if envelope is ACTIVE for this instrument
   if (XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn]-1]->VolumeType & 0x01) {
@@ -527,7 +534,8 @@ void StartEnvelope (u8 chn, u8 startpoint) {
   }
 }
 
-void ElaborateEnvelope (u8 chn, u8 instrument) {
+static void ElaborateEnvelope(u8 chn, u8 instrument)
+{
   // This function should elaborate the volume envelope of the instrument playing on that channel
   // Now also the panning envelope!
 
@@ -649,7 +657,8 @@ void ElaborateEnvelope (u8 chn, u8 instrument) {
 }
 
 // function used by Vibrato & Tremolo  (6.10 fixed point)
-s16 CalculateModulatorValue (u8 type, u8 pos) {
+static s16 CalculateModulatorValue(u8 type, u8 pos)
+{
   s16 fixed = 0;
   switch (type) {
 
@@ -672,19 +681,21 @@ s16 CalculateModulatorValue (u8 type, u8 pos) {
   return (fixed);
 }
 
-s8 CalculateVibratoValue (u8 type, u8 pos, u8 dep) {
+static s8 CalculateVibratoValue(u8 type, u8 pos, u8 dep)
+{
   // this is for calculating bending in x/128 of a semitone (depth was=[0..15])
   // ret is: [-120..+120] and this is in x/128th of a semitone
   return ( CalculateModulatorValue(type, pos) * dep >> 7);
 }
 
-s8 CalculateTremoloValue (u8 type, u8 pos, u8 dep) {
+static s8 CalculateTremoloValue(u8 type, u8 pos, u8 dep)
+{
   // ret is: [-60..+60] (0x0f * 4)
   return ( CalculateModulatorValue (type, pos) * dep >> 8);
 }
 
-u16 DecodeVolumeColumn (u8 chn, u8 volcmd, u8 curtick, u8 EDxInAction) {
-
+static u16 DecodeVolumeColumn(u8 chn, u8 volcmd, u8 curtick, u8 EDxInAction)
+{
   s32 diff;
   u16 resvalue = 0x0001;
   // 0x0001 = change volume and/or panning
@@ -821,8 +832,8 @@ u16 DecodeVolumeColumn (u8 chn, u8 volcmd, u8 curtick, u8 EDxInAction) {
 }
 
 
-u16 DecodeBeforeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick) {
-
+static u16 DecodeBeforeEffectsColumn(u8 chn, u8 effcmd, u8 effpar, u8 curtick)
+{
   (void)chn;
 
   u16 resvalue=0;
@@ -879,7 +890,8 @@ u16 DecodeBeforeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick) {
   return (resvalue);
 }
 
-u8 MemoryEffectxxTogether (u8 value, u8 *store) {
+static u8 MemoryEffectxxTogether(u8 value, u8 *store)
+{
   // checks the value and gets from *store if it's ZERO
   // writes into store the new value
   // the value is manipulated as a whole
@@ -894,7 +906,8 @@ u8 MemoryEffectxxTogether (u8 value, u8 *store) {
 }
 
 
-u8 MemoryEffectxySeparated (u8 value, u8 *store) {
+static u8 MemoryEffectxySeparated(u8 value, u8 *store)
+{
   // checks the value and gets from *store what is ZERO
   // writes into store the new value
   // the value is manipulated as a two separate values
@@ -922,8 +935,8 @@ u8 MemoryEffectxySeparated (u8 value, u8 *store) {
   return (value);
 }
 
-u16 DecodeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick, u16 addtick) {
-
+static u16 DecodeEffectsColumn(u8 chn, u8 effcmd, u8 effpar, u8 curtick, u16 addtick)
+{
   s32 diff;
   u16 resvalue=0xffff;
   u8 tmpvalue;
@@ -1443,8 +1456,8 @@ u16 DecodeEffectsColumn (u8 chn, u8 effcmd, u8 effpar, u8 curtick, u16 addtick) 
   return (resvalue);
 }
 
-XM7_Sample_Type* GetSamplePointer (u8 note, u8 instrument) {
-
+static XM7_Sample_Type* GetSamplePointer(u8 note, u8 instrument)
+{
   if (instrument>0) {
     // my array starts from instrument # 0 ...
     instrument--;
@@ -1468,8 +1481,8 @@ XM7_Sample_Type* GetSamplePointer (u8 note, u8 instrument) {
 }
 
 
-int CalculateFreq (u8 mode, u8 note, s16 relativenote, s16 finetune, s32 periodpitch, s8 vibratopitch, s8 autovibratopitch, u8 glissandotype) {
-
+static int CalculateFreq(u8 mode, u8 note, s16 relativenote, s16 finetune, s32 periodpitch, s8 vibratopitch, s8 autovibratopitch, u8 glissandotype)
+{
   int freq=0;
 
   if (mode!=0) {
@@ -1595,8 +1608,8 @@ int CalculateFreq (u8 mode, u8 note, s16 relativenote, s16 finetune, s32 periodp
 }
 
 
-s8 CalculateAutoVibrato (u8 chn, u8 instrument) {
-
+static s8 CalculateAutoVibrato(u8 chn, u8 instrument)
+{
   XM7_Instrument_Type* instr = XM7_TheModule->Instrument[instrument-1];
   s8 autovib=0;   // will be returned in x/128th of semitone
 
@@ -1633,8 +1646,8 @@ s8 CalculateAutoVibrato (u8 chn, u8 instrument) {
 }
 
 
-void PitchNote (u8 chn, u8 pitch, s32 porta, s8 vibra) {
-
+static void PitchNote(u8 chn, u8 pitch, s32 porta, s8 vibra)
+{
   u8 note = XM7_TheModule->CurrentChannelLastNote[chn]-1;
   u8 instrument = XM7_TheModule->CurrentChannelLastInstrument[chn];
   u8 glis = XM7_TheModule->CurrentGlissandoType[chn];
@@ -1655,8 +1668,8 @@ void PitchNote (u8 chn, u8 pitch, s32 porta, s8 vibra) {
   }
 }
 
-void PlayNote (u8 chn, u16 sample_offset) {
-
+static void PlayNote(u8 chn, u16 sample_offset)
+{
   u8 note = XM7_TheModule->CurrentChannelLastNote[chn]-1;
   u8 instrument = XM7_TheModule->CurrentChannelLastInstrument[chn];
   u8 glis = XM7_TheModule->CurrentGlissandoType[chn];
@@ -1708,8 +1721,8 @@ void PlayNote (u8 chn, u16 sample_offset) {
   }
 }
 
-void ChangeSample (u8 chn) {
-
+static void ChangeSample(u8 chn)
+{
   u8 note = XM7_TheModule->CurrentChannelLastNote[chn]-1;
   u8 instrument = XM7_TheModule->CurrentChannelLastInstrument[chn];
   XM7_Sample_Type* sample_ptr = GetSamplePointer(note,instrument);
@@ -1721,7 +1734,8 @@ void ChangeSample (u8 chn) {
 
 }
 
-void Timer1Handler (void) {
+static void Timer1Handler(void)
+{
   // this gets called each time Timer1 'overflows'
   XM7_SingleNoteArray_Type* CurrNoteLine;
   XM7_SingleNote_Type* CurrNote = NULL;
@@ -2190,8 +2204,8 @@ void Timer1Handler (void) {
 }
 
 
-void XM7_PlayModuleFromPos (XM7_ModuleManager_Type* TheModule, u8 position) {
-
+void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position)
+{
   XM7_TheModule = TheModule;
 
   // set, ready...
@@ -2287,13 +2301,14 @@ void XM7_PlayModuleFromPos (XM7_ModuleManager_Type* TheModule, u8 position) {
 }
 
 
-void XM7_PlayModule (XM7_ModuleManager_Type* TheModule) {
+void XM7_PlayModule(XM7_ModuleManager_Type* TheModule)
+{
   XM7_PlayModuleFromPos (TheModule, 0);
 }
 
 
-void XM7_StopModule() {
-
+void XM7_StopModule(void)
+{
   u8 i;
 
   // will deactivate the timer IRQ (and stop the channels)
@@ -2306,8 +2321,10 @@ void XM7_StopModule() {
   // change the state
   XM7_TheModule->State = XM7_STATE_STOPPED;
 }
+
 /*
-void XM7_PauseModule() {
+void XM7_PauseModule(void)
+{
   int i;
 
   // will deactivate the timer IRQ (and stop the channels)
@@ -2318,7 +2335,8 @@ void XM7_PauseModule() {
     XM7_lowlevel_pauseSound (i);
 }
 
-void XM7_ResumeModule() {
+void XM7_ResumeModule(void)
+{
   int i;
   // then set the timer and make it start!
   TIMER1_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
@@ -2329,7 +2347,9 @@ void XM7_ResumeModule() {
     XM7_lowlevel_resumeSound (i);
 }
 */
-void XM7_Initialize() {
+
+void XM7_Initialize(void)
+{
   CalculateVeryFineTunes();
   // CalculateRealPanningArray (45);   //  (35% of 128 = 44,8)
 }
@@ -2378,8 +2398,8 @@ void XM7_Initialize() {
 
 
   /*
-void startSound(int sampleRate, const void* data, u32 bytes, u8 channel, u8 vol,  u8 pan, u8 format) {
-
+void startSound(int sampleRate, const void* data, u32 bytes, u8 channel, u8 vol,  u8 pan, u8 format)
+{
   SCHANNEL_CR(channel) = 0;
 
   if (bytes>0) {
@@ -2390,5 +2410,3 @@ void startSound(int sampleRate, const void* data, u32 bytes, u8 channel, u8 vol,
   }
 }
 */
-
-

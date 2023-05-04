@@ -14,8 +14,8 @@
 u16 AmigaPeriods[12] = { 1712, 1616, 1525, 1440, 1357, 1281,
                           1209, 1141, 1077, 1017, 961, 907 };
 
-u16 GetAmigaPeriod (u8 note) {  // note from 0 to 95
-
+static u16 GetAmigaPeriod(u8 note) // note from 0 to 95
+{
   u16 period = AmigaPeriods[note % 12];
   int octave = (note / 12) - AMIGABASEOCTAVE;
 
@@ -27,7 +27,8 @@ u16 GetAmigaPeriod (u8 note) {  // note from 0 to 95
   return(period);
 }
 
-u8 FindClosestNoteToAmigaPeriod (u16 period) {  // note from 0 to 95
+static u8 FindClosestNoteToAmigaPeriod(u16 period) // note from 0 to 95
+{
   u8 note=0;
   u16 bottomperiod;
   u16 topperiod;
@@ -54,12 +55,13 @@ u8 FindClosestNoteToAmigaPeriod (u16 period) {  // note from 0 to 95
     return (note-1);
 }
 
-u16 SwapBytes (u16 in) {
+static u16 SwapBytes(u16 in)
+{
   return ((in & 0x00FF) << 8 | (in >> 8));
 }
 
-u8 IdentifyMOD (char c1, char c2, char c3, char c4) {
-
+static u8 IdentifyMOD(char c1, char c2, char c3, char c4)
+{
   // 4 channels MOD
   if ((c1=='M') && (c2=='.') && (c3=='K') && (c4=='.'))   // M.K.
     return (4);
@@ -112,7 +114,8 @@ u8 IdentifyMOD (char c1, char c2, char c3, char c4) {
   return (0);
 }
 
-XM7_SingleNoteArray_Type* PrepareNewPattern (u16 len, u8 chn) {
+static XM7_SingleNoteArray_Type* PrepareNewPattern(u16 len, u8 chn)
+{
   // prepares a new EMPTY pattern with LEN lines and CNH channels
 
   XM7_SingleNoteArray_Type* ptr;
@@ -135,7 +138,8 @@ XM7_SingleNoteArray_Type* PrepareNewPattern (u16 len, u8 chn) {
   return (ptr);
 }
 
-XM7_Instrument_Type* PrepareNewInstrument (void) {
+static XM7_Instrument_Type* PrepareNewInstrument(void)
+{
   // prepares a new EMPTY instrument
 
   XM7_Instrument_Type* ptr = (XM7_Instrument_Type*) malloc ( sizeof (XM7_Instrument_Type));
@@ -156,7 +160,8 @@ XM7_Instrument_Type* PrepareNewInstrument (void) {
   return (ptr);
 }
 
-XM7_Sample_Type* PrepareNewSample (u32 len, u32 looplen, u8 flags) {
+static XM7_Sample_Type* PrepareNewSample(u32 len, u32 looplen, u8 flags)
+{
   // prepares a new EMPTY sample
 
   XM7_SampleData_Type* data_ptr;
@@ -207,8 +212,9 @@ XM7_Sample_Type* PrepareNewSample (u32 len, u32 looplen, u8 flags) {
   return (ptr);
 }
 
-u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModule) {  // returns 0 if OK, an error otherwise
-
+// returns 0 if OK, an error otherwise
+u16 XM7_LoadXM(XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModule)
+{
   // reset these values
   Module->NumberofPatterns = 0;
   Module->NumberofInstruments = 0;
@@ -641,7 +647,8 @@ u16 XM7_LoadXM (XM7_ModuleManager_Type* Module, XM7_XMModuleHeader_Type* XMModul
 }
 
 
-u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODModule) {
+u16 XM7_LoadMOD(XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODModule)
+{
   // returns 0 if OK, an error otherwise
 
   int FLT8Flag;
@@ -861,7 +868,7 @@ u16 XM7_LoadMOD (XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODMo
 }
 
 
-void XM7_UnloadXM (XM7_ModuleManager_Type* Module)
+void XM7_UnloadXM(XM7_ModuleManager_Type* Module)
 {
   s16 i,j;
   XM7_Instrument_Type* CurrentInstrumentPtr;
@@ -895,15 +902,18 @@ void XM7_UnloadXM (XM7_ModuleManager_Type* Module)
 }
 
 
-void XM7_UnloadMOD (XM7_ModuleManager_Type* Module) {
-  XM7_UnloadXM (Module);
+void XM7_UnloadMOD(XM7_ModuleManager_Type* Module)
+{
+  XM7_UnloadXM(Module);
 }
 
-void XM7_SetReplayStyle  (XM7_ModuleManager_Type* Module, u8 style) {
+void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, u8 style)
+{
   Module->ReplayStyle = style;
 }
 
-void XM7_SetPanningStyle (XM7_ModuleManager_Type* Module, u8 style, u8 displacement) {
+void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, u8 style, u8 displacement)
+{
   Module->AmigaPanningEmulation = style;
   Module->AmigaPanningDisplacement = displacement;
 }
