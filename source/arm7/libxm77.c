@@ -1072,9 +1072,10 @@ static u16 DecodeEffectsColumn(u8 chn, u8 effcmd, u8 effpar, u8 curtick, u16 add
       // "The sample that the note triggers is played from offset xx.
       // The offsets are spread 256 samples apart so 908 skips the first (0x8*256=) 2048 bytes
       // of the sample and plays it on from there."
-      if (curtick==0)
+      if (curtick==0) {
         effpar = MemoryEffectxxTogether (effpar, &XM7_TheModule->Effect9xxMemory[chn]);
         resvalue= 0x0900 | effpar;
+      }
       break;
 
     case 0x5:
