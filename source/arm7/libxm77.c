@@ -9,7 +9,7 @@
 #include <libxm7.h>
 
 // these are the variables I need to make the module play!
-XM7_ModuleManager_Type* XM7_TheModule;
+static XM7_ModuleManager_Type* XM7_TheModule;
 
 // calculated as
 // Period = 10*12*16*4 - Note*16*4 - FineTune/2;   (finetune = 0)
@@ -18,27 +18,27 @@ XM7_ModuleManager_Type* XM7_TheModule;
 
 #define BASEOCTAVE 6
 // frequencies of the 6th octave
-u16 SampleFrequency [12] = { 33452, 35441, 37549, 39781,
-                             42147, 44653, 47308, 50121,
-                             53102, 56259, 59605, 63149 };
-
+static u16 SampleFrequency[12] = {
+    33452, 35441, 37549, 39781, 42147, 44653, 47308, 50121, 53102, 56259, 59605,
+    63149
+};
 
 // finetunes with x.10 fixed point precision
 // 2^((i*8)/(12*128)) << 10
 #define FINETUNEPRECISION 10
-u16 FineTunes [17] = { 1024, 1028, 1031, 1035,
-                       1039, 1043, 1046, 1050,
-                       1054, 1058, 1062, 1065,
-                       1069, 1073, 1077, 1081, 1085 };
+static u16 FineTunes[17] = {
+    1024, 1028, 1031, 1035, 1039, 1043, 1046, 1050, 1054, 1058, 1062, 1065,
+    1069, 1073, 1077, 1081, 1085
+};
 
 /*
 // these are finetunes with x.14  fixed point precision
-// 2^(i/(12*16)) << 14
+// 2^(i / (12 * 16)) << 14
 #define FINETUNEPRECISION 14
-int FineTunes [17] = { 16384, 16443, 16503, 16562,
-                       16622, 16682, 16743, 16803,
-                       16864, 16925, 16986, 17048,
-                       17109, 17171, 17233, 17296, 17358 };
+static int FineTunes[17] = {
+    16384, 16443, 16503, 16562, 16622, 16682, 16743, 16803, 16864, 16925, 16986,
+    17048, 17109, 17171, 17233, 17296, 17358
+};
 */
 
 // NTSC Amiga timer 7159090,5
@@ -46,18 +46,21 @@ int FineTunes [17] = { 16384, 16443, 16503, 16562,
 // MOD octave 0 difference
 #define AMIGABASEOCTAVE 2
 // AmigaPeriods for MOD "Octave ZERO"
-u16 AmigaPeriods[12] = { 1712, 1616, 1525, 1440, 1357, 1281,
-                         1209, 1141, 1077, 1017, 961, 907 };
+static u16 AmigaPeriods[12] = {
+    1712, 1616, 1525, 1440, 1357, 1281, 1209, 1141, 1077, 1017, 961, 907
+};
 
 // sin(x) with 6.10 fixed point precision
-// round ( sin(i/32*Pi) << 10 )
-u16 sinus[17] = { 0, 100, 200, 297, 392, 483, 569, 650, 724,
-                  792, 851, 903, 946, 980, 1004, 1019, 1024 };
+// round(sin(i / 32 * Pi) << 10)
+static u16 sinus[17] = {
+    0, 100, 200, 297, 392, 483, 569, 650, 724, 792, 851, 903, 946, 980, 1004,
+    1019, 1024
+};
 
-u16 VeryFineTunes [129];
+static u16 VeryFineTunes[129];
 // will be calculated from FineTunes[], interpolating (linear)...
 
-// u8 RealPanning [129];   // indexes [0..128], values from [0..0x80]
+// u8 RealPanning[129]; // indexes [0..128], values from [0..0x80]
 // will be calculated by Pan Aperture
 
 #define YES                 1
@@ -70,470 +73,524 @@ u16 VeryFineTunes [129];
 
 static void CalculateVeryFineTunes(void)
 {
-  u8 i,j;
-
-  for (i=0;i<=128;i++) {
-    j = i >> 3;
-    if ((i & 0x07)==0) {
-      VeryFineTunes [i] = FineTunes[j];
-    } else {
-      // interpolation (linear)
-      VeryFineTunes [i] = FineTunes [j] + (((FineTunes [j+1]-FineTunes [j]) * (i & 0x07)) >> 3);
+    for (u8 i = 0; i <= 128; i++)
+    {
+        u8 j = i >> 3;
+        if ((i & 0x07)==0)
+        {
+            VeryFineTunes[i] = FineTunes[j];
+        }
+        else
+        {
+            // interpolation (linear)
+            VeryFineTunes[i] = FineTunes[j]
+                             + (((FineTunes[j + 1] - FineTunes[j]) * (i & 0x07)) >> 3);
+        }
     }
-  }
 }
-
 
 static u16 GetAmigaPeriod(u8 note) // note from 0 to 95
 {
-  u16 period = AmigaPeriods[note % 12];
-  int octave = (note / 12) - AMIGABASEOCTAVE;
+    u16 period = AmigaPeriods[note % 12];
+    int octave = (note / 12) - AMIGABASEOCTAVE;
 
-  if (octave>0)
-    period >>= octave;
-  else if (octave<0)
-    period <<= -octave;
+    if (octave > 0)
+        period >>= octave;
+    else if (octave < 0)
+        period <<= -octave;
 
-  return(period);
+    return period;
 }
 
 static u8 FindClosestNoteToAmigaPeriod(u16 period) // note from 0 to 95
 {
-  u8 note=0;
-  u16 bottomperiod;
-  u16 topperiod;
+    u8 note = 0;
+    u16 bottomperiod;
+    u16 topperiod;
 
-  // jump octaves
-  topperiod = GetAmigaPeriod(note);
-  while (topperiod >= (period*2) ) {
-    note += 12;
+    // jump octaves
     topperiod = GetAmigaPeriod(note);
-  }
+    while (topperiod >= (period * 2))
+    {
+        note += 12;
+        topperiod = GetAmigaPeriod(note);
+    }
 
-  // jump notes
-  bottomperiod=topperiod;
-  while (topperiod > period ) {
+    // jump notes
     bottomperiod=topperiod;
-    note++;
-    topperiod = GetAmigaPeriod(note);
-  }
+    while (topperiod > period)
+    {
+        bottomperiod=topperiod;
+        note++;
+        topperiod = GetAmigaPeriod(note);
+    }
 
-  // find closest
-  if ((period-topperiod) <= (bottomperiod-period))
-    return (note);
-  else
-    return (note-1);
+    // find closest
+    if ((period - topperiod) <= (bottomperiod - period))
+        return note;
+    else
+        return note - 1;
 }
 
 /*
 static void CalculateRealPanningArray(u8 halfvalue) // halfvalue = 0..128
 {
-  u8 i,j,k;
+    u8 i, j, k;
 
-  // resets values
-  for (i=0;i<=128;i++)
-    RealPanning [i] = 0xff;
+    // resets values
+    for (i = 0; i <= 128; i++)
+        RealPanning[i] = 0xff;
 
-  // set start values
-  RealPanning [0]   = 0;
-  RealPanning [128] = 128;
-  RealPanning [64]  = halfvalue;
+    // set start values
+    RealPanning[0] = 0;
+    RealPanning[128] = 128;
+    RealPanning[64] = halfvalue;
 
-  for (j=5;j>0;j--) {
+    for (j = 5; j > 0; j--)
+    {
+        halfvalue >>= 1; // half of halfvalue
+        k = 0x01 << j;
 
-    halfvalue >>= 1;    // half of halfvalue
-    k = (0x01 << j);
-
-
-    for (i=k;i<128;i=i+k) {
-
-      if (RealPanning[i]==0xff)
-        RealPanning[i]=RealPanning[i-k] + halfvalue;
-
+        for (i = k; i < 128; i = i + k)
+        {
+            if (RealPanning[i] == 0xff)
+                RealPanning[i] = RealPanning[i - k] + halfvalue;
+        }
     }
-
-  }
 }
 */
 
 static void XM7_lowlevel_stopSound(u8 channel)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
-  SCHANNEL_CR(channel) = 0;
+    // use channels starting from last!
+    channel = 15 - channel;
+    SCHANNEL_CR(channel) = 0;
 }
+
 /*
 static void XM7_lowlevel_pauseSound(u8 channel)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
-  SCHANNEL_CR(channel) &= ~SCHANNEL_ENABLE;
+    // use channels starting from last!
+    channel = 15 - channel;
+    SCHANNEL_CR(channel) &= ~SCHANNEL_ENABLE;
 }
 
 static void XM7_lowlevel_resumeSound(u8 channel)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
-  SCHANNEL_CR(channel) |= SCHANNEL_ENABLE;
+    // use channels starting from last!
+    channel = 15 - channel;
+    SCHANNEL_CR(channel) |= SCHANNEL_ENABLE;
 }
 */
-static void XM7_lowlevel_startSound(int sampleRate, const void* data, u32 length, u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
+
+static void XM7_lowlevel_startSound(int sampleRate, const void *data, u32 length,
+                                    u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
+    // use channels starting from last!
+    channel = 15 - channel;
 
-  SCHANNEL_CR(channel) = 0;
-  offset = format?(offset*2):offset;
+    SCHANNEL_CR(channel) = 0;
+    offset = format ? (offset * 2) : offset;
 
-  // check if offset is still IN the sample (and len>0)
-  if (length>offset) {
-    SCHANNEL_TIMER(channel)  = SOUND_FREQ(sampleRate);
-    SCHANNEL_SOURCE(channel) = ((u32)data)+offset;
-      SCHANNEL_REPEAT_POINT(channel) = 0;
-    SCHANNEL_LENGTH(channel) = (length-offset) >> 2;
-    SCHANNEL_CR(channel)     = SCHANNEL_ENABLE | SOUND_ONE_SHOT | SOUND_VOL(vol) | SOUND_PAN(pan) | (format==0?SOUND_FORMAT_8BIT:SOUND_FORMAT_16BIT);
-  }
+    // check if offset is still IN the sample (and len>0)
+    if (length > offset)
+    {
+        SCHANNEL_TIMER(channel) = SOUND_FREQ(sampleRate);
+        SCHANNEL_SOURCE(channel) = ((u32)data) + offset;
+        SCHANNEL_REPEAT_POINT(channel) = 0;
+        SCHANNEL_LENGTH(channel) = (length - offset) >> 2;
+        SCHANNEL_CR(channel) = SCHANNEL_ENABLE | SOUND_ONE_SHOT | SOUND_VOL(vol) |
+                               SOUND_PAN(pan) | (format == 0 ? SOUND_FORMAT_8BIT : SOUND_FORMAT_16BIT);
+    }
 }
 
-static void XM7_lowlevel_startSoundwLoop(int sampleRate, const void* data, u32 looplength, u32 loopstart, u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
+static void XM7_lowlevel_startSoundwLoop(int sampleRate, const void *data, u32 looplength,
+                                         u32 loopstart, u8 channel, u8 vol, u8 pan, u8 format, u32 offset)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
+    // use channels starting from last!
+    channel = 15 - channel;
 
-  SCHANNEL_CR(channel) = 0;
-  offset = format?(offset*2):offset;
+    SCHANNEL_CR(channel) = 0;
+    offset = format ? (offset * 2) : offset;
 
-  // check if offset is still IN the sample (and len>0)
-  if ((loopstart+looplength)>offset) {
-    // check if offset is still in the NON-looping part of the sample.
-    // reset it to the BEGINNING of the LOOPING PART of the SAMPLE if it doesn't
-    if (offset>loopstart)
-      offset = (format==0?loopstart:(loopstart>>1));
+    // check if offset is still IN the sample (and len>0)
+    if ((loopstart + looplength) > offset)
+    {
+        // check if offset is still in the NON-looping part of the sample.
+        // reset it to the BEGINNING of the LOOPING PART of the SAMPLE if it doesn't
+        if (offset > loopstart)
+            offset = (format == 0 ? loopstart : (loopstart >> 1));
 
-    SCHANNEL_TIMER(channel)  = SOUND_FREQ(sampleRate);
-    SCHANNEL_SOURCE(channel) = ((u32)data)+offset;
-    SCHANNEL_REPEAT_POINT(channel) = (loopstart-offset) >> 2;
-      SCHANNEL_LENGTH(channel) = looplength >> 2;
-    SCHANNEL_CR(channel) = SCHANNEL_ENABLE | SOUND_REPEAT | SOUND_VOL(vol) | SOUND_PAN(pan) | (format?SOUND_FORMAT_16BIT:SOUND_FORMAT_8BIT);
-  }
+        SCHANNEL_TIMER(channel) = SOUND_FREQ(sampleRate);
+        SCHANNEL_SOURCE(channel) = ((u32)data) + offset;
+        SCHANNEL_REPEAT_POINT(channel) = (loopstart - offset) >> 2;
+        SCHANNEL_LENGTH(channel) = looplength >> 2;
+        SCHANNEL_CR(channel) = SCHANNEL_ENABLE | SOUND_REPEAT | SOUND_VOL(vol) |
+                               SOUND_PAN(pan) | (format ? SOUND_FORMAT_16BIT : SOUND_FORMAT_8BIT);
+    }
 }
 
 static void XM7_lowlevel_setVolumeandPanning(u8 channel, u8 vol, u8 pan)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
+    // use channels starting from last!
+    channel = 15 - channel;
 
-  SCHANNEL_VOL (channel) = (vol & 0x7f);
-  SCHANNEL_PAN (channel) = (pan & 0x7f);
+    SCHANNEL_VOL(channel) = (vol & 0x7f);
+    SCHANNEL_PAN(channel) = (pan & 0x7f);
 }
 
 static void XM7_lowlevel_pitchSound (int sampleRate, u8 channel)
 {
-  // use channels starting from last!
-  channel = 15 - channel;
+    // use channels starting from last!
+    channel = 15 - channel;
 
-  SCHANNEL_TIMER(channel) = SOUND_FREQ(sampleRate);
+    SCHANNEL_TIMER(channel) = SOUND_FREQ(sampleRate);
 }
 
 // define this to access the higherbyte of SCHANNEL_CR
-#define SCHANNEL_CR_HIGHERBYTE(n)   (*(vu8*)(0x04000403 + ((n)<<4)))
+#define SCHANNEL_CR_HIGHERBYTE(n)   (*(vu8 *)(0x04000403 + ((n) << 4)))
 #define SCHANNEL_CR_SHIFTBITS       24
 
-static void XM7_lowlevel_changeSample(const void* data, u32 looplength, u32 loopstart, u8 channel, u8 format)
+static void XM7_lowlevel_changeSample(const void *data, u32 looplength, u32 loopstart,
+                                      u8 channel, u8 format)
 {
-  (void)format;
+    (void)format;
 
-  // use channels starting from last!
-  channel = 15 - channel;
+    // use channels starting from last!
+    channel = 15 - channel;
 
-  SCHANNEL_SOURCE (channel) = (u32)data;
-  SCHANNEL_REPEAT_POINT (channel) = loopstart >> 2;
-  SCHANNEL_LENGTH (channel) = looplength >> 2;
-  // BETA: sets sound_repeat even if it's not
-  // BETA2: doesn't change that because MOD support only 8 bits samples
-  // SCHANNEL_CR_HIGHERBYTE (channel) = (SCHANNEL_ENABLE | SOUND_REPEAT | (format?SOUND_FORMAT_16BIT:SOUND_FORMAT_8BIT)) >> SCHANNEL_CR_SHIFTBITS;
+    SCHANNEL_SOURCE (channel) = (u32)data;
+    SCHANNEL_REPEAT_POINT (channel) = loopstart >> 2;
+    SCHANNEL_LENGTH (channel) = looplength >> 2;
+    // BETA: sets sound_repeat even if it's not
+    // BETA2: doesn't change that because MOD support only 8 bits samples
+    // SCHANNEL_CR_HIGHERBYTE(channel) = (SCHANNEL_ENABLE | SOUND_REPEAT |
+    //      (format ? SOUND_FORMAT_16BIT : SOUND_FORMAT_8BIT)) >> SCHANNEL_CR_SHIFTBITS;
 }
 
 static void SetTimerSpeedBPM(u8 BPM)
 {
-  // calculate the main timer freq
-  // - the freq is 33.513.982 Hz, when prescaler is F/1024 then it's 32.728,5 Hz (circa)
-  // = 1.963.710 clicks/minute , then divided by 6 because there are 6 ticks/line
-  //   then divided by 4 because BPM is on 4/4th,
+    // calculate the main timer freq
+    // - the freq is 33.513.982 Hz, when prescaler is F/1024 then it's 32.728,5 Hz (circa)
+    // = 1.963.710 clicks/minute , then divided by 6 because there are 6 ticks/line
+    //   then divided by 4 because BPM is on 4/4th,
 
-  // set the timer
-  u16 timer = 1963710 / (BPM * 24);
-  TIMER1_DATA = - timer;
+    // set the timer
+    u16 timer = 1963710 / (BPM * 24);
+    TIMER1_DATA = - timer;
 
-  // start/restart it!
-  TIMER1_CR &= ~TIMER_ENABLE;
-  TIMER1_CR |= TIMER_ENABLE;
+    // start/restart it!
+    TIMER1_CR &= ~TIMER_ENABLE;
+    TIMER1_CR |= TIMER_ENABLE;
 }
 
 static u8 CalculateFinalVolume(u8 samplevol, u8 envelopevol, u16 fadeoutvol)
 {
-  // gives back [0x00-0x7f]
-  // FinalVol=(FadeOutVol/32768)*(EnvelopeVol/64)*(GlobalVol/64)*(Vol/64)*Scale;
-  // scale is 0x80
-  u8 tmpvol = ((fadeoutvol>>3)*envelopevol*XM7_TheModule->CurrentGlobalVolume*samplevol) >> 23;
+    // gives back [0x00-0x7f]
+    // FinalVol=(FadeOutVol/32768)*(EnvelopeVol/64)*(GlobalVol/64)*(Vol/64)*Scale;
+    // scale is 0x80
+    u8 tmpvol = ((fadeoutvol >> 3) * envelopevol * XM7_TheModule->CurrentGlobalVolume * samplevol) >> 23;
 
-  // clip volume value
-  if (tmpvol>0x7f) {
-    tmpvol = 0x7f;
-  }
+    // clip volume value
+    if (tmpvol > 0x7f)
+        tmpvol = 0x7f;
 
-  return (tmpvol);
+    return (tmpvol);
 }
 
 static u8 CalculateFinalPanning(u8 chn, u8 samplepan, u8 envelopepan)
 {
-  // gives back [0x00-0x7f]
-  // FinalPan=Pan+(EnvelopePan-32)*(128-Abs(Pan-128))/32;
-  // return is UNSIGNED 0..127
-  u8 res=0;
+    // gives back [0x00-0x7f]
+    // FinalPan=Pan+(EnvelopePan-32)*(128-Abs(Pan-128))/32;
+    // return is UNSIGNED 0..127
+    u8 res = 0;
 
-  if (XM7_TheModule->AmigaPanningEmulation) {
-    switch (chn & 0x03) {
-      case 0:
-      case 3:res = 0x00 + XM7_TheModule->AmigaPanningDisplacement;
-             break;
+    if (XM7_TheModule->AmigaPanningEmulation)
+    {
+        switch (chn & 0x03)
+        {
+            case 0:
+            case 3:
+                res = 0x00 + XM7_TheModule->AmigaPanningDisplacement;
+                break;
 
-      case 1:
-      case 2:res = 0x7f - XM7_TheModule->AmigaPanningDisplacement;
-             break;
+            case 1:
+            case 2:
+                res = 0x7f - XM7_TheModule->AmigaPanningDisplacement;
+                break;
+        }
     }
-  } else {
-    // when there was no panning envelope, it was simply:
-    // res = (samplepan >> 1);
-    res = (samplepan + ((envelopepan-32) * (128-abs(samplepan-128))) / 32 ) >> 1;
-
-    // calculate real pan with new method  (deactivated, actually)
-    /*
-    if (samplepan>=0x80)
-      res = 63 + (RealPanning[samplepan-0x80] >> 1);  // gives 63..127
     else
-      res = 64 - (RealPanning[0x80-samplepan] >> 1);  // gives 0..64
-    */
-  }
+    {
+        // when there was no panning envelope, it was simply:
+        // res = (samplepan >> 1);
+        res = (samplepan + ((envelopepan - 32) * (128 - abs(samplepan - 128))) / 32 ) >> 1;
 
-  return (res);
+        // calculate real pan with new method (deactivated, actually)
+        /*
+        if (samplepan >= 0x80)
+            res = 63 + (RealPanning[samplepan - 0x80] >> 1); // gives 63..127
+        else
+            res = 64 - (RealPanning[0x80 - samplepan] >> 1); // gives 0..64
+        */
+    }
+
+    return res;
 }
 
 static void SlideSampleVolume(u8 chn, s8 change)
 {
-  // change is -0x40 ... 0x40
-  if (change>0) {
-    XM7_TheModule->CurrentSampleVolume[chn] += change;
-    if ( XM7_TheModule->CurrentSampleVolume[chn] > 0x40 )
-      XM7_TheModule->CurrentSampleVolume[chn] = 0x40;
-  } else {
-    if ( XM7_TheModule->CurrentSampleVolume[chn] > -change )
-      XM7_TheModule->CurrentSampleVolume[chn] += change;
+    // change is -0x40 ... 0x40
+    if (change > 0)
+    {
+        XM7_TheModule->CurrentSampleVolume[chn] += change;
+        if (XM7_TheModule->CurrentSampleVolume[chn] > 0x40)
+            XM7_TheModule->CurrentSampleVolume[chn] = 0x40;
+    }
     else
-      XM7_TheModule->CurrentSampleVolume[chn] = 0;
-  }
+    {
+        if (XM7_TheModule->CurrentSampleVolume[chn] > -change)
+            XM7_TheModule->CurrentSampleVolume[chn] += change;
+        else
+            XM7_TheModule->CurrentSampleVolume[chn] = 0;
+    }
 }
 
 static void SlideSamplePan(u8 chn, s8 change)
 {
-  // change is -0x0f ... 0x0f
-  if (change>0) {
-    // pan RIGHT
-    if ((255 - XM7_TheModule->CurrentSamplePanning[chn])>change)
-      XM7_TheModule->CurrentSamplePanning[chn] += change;
+    // change is -0x0f ... 0x0f
+    if (change > 0)
+    {
+        // pan RIGHT
+        if ((255 - XM7_TheModule->CurrentSamplePanning[chn]) > change)
+            XM7_TheModule->CurrentSamplePanning[chn] += change;
+        else
+            XM7_TheModule->CurrentSamplePanning[chn] = 0xFF; // complete RIGHT
+    }
     else
-      XM7_TheModule->CurrentSamplePanning[chn] = 0xFF;   // complete RIGHT
-  } else {
-    // pan LEFT
-    if ( XM7_TheModule->CurrentSamplePanning[chn] > -change )
-      XM7_TheModule->CurrentSamplePanning[chn] += change;
-    else
-      XM7_TheModule->CurrentSamplePanning[chn] = 0x00;    // complete LEFT
-  }
+    {
+        // pan LEFT
+        if (XM7_TheModule->CurrentSamplePanning[chn] > -change)
+            XM7_TheModule->CurrentSamplePanning[chn] += change;
+        else
+            XM7_TheModule->CurrentSamplePanning[chn] = 0x00; // complete LEFT
+    }
 }
 
 static void ChangeVolumeonRetrigTable(u8 chn, u8 param)
 {
-  switch (param) {
-    case 0:
-    case 8: break;
+    switch (param)
+    {
+        case 0:
+        case 8:
+            break;
 
-    case 1 ... 5:SlideSampleVolume (chn, -(1 << (param-1)));   // -1, -2, -4, -8, -16
-                  break;
+        case 1 ... 5:
+            SlideSampleVolume(chn, -(1 << (param - 1))); // -1, -2, -4, -8, -16
+            break;
 
-    case 9 ... 0x0d:SlideSampleVolume (chn, ( 1 << (param-9)));  // +1, +2, +4, +8, +16
-                     break;
+        case 9 ... 0x0d:
+            SlideSampleVolume(chn, (1 << (param - 9))); // +1, +2, +4, +8, +16
+            break;
 
-    case 6:XM7_TheModule->CurrentSampleVolume[chn] = (XM7_TheModule->CurrentSampleVolume[chn]*2/3);  //  * 2/3
-           break;
+        case 6:
+            XM7_TheModule->CurrentSampleVolume[chn] = (XM7_TheModule->CurrentSampleVolume[chn] * 2 / 3); // * 2/3
+            break;
 
-    case 7:XM7_TheModule->CurrentSampleVolume[chn] /= 2;  //  * 1/2
-           break;
+        case 7:
+            XM7_TheModule->CurrentSampleVolume[chn] /= 2;  // * 1/2
+            break;
 
-    case 0x0e:XM7_TheModule->CurrentSampleVolume[chn] = (XM7_TheModule->CurrentSampleVolume[chn]*3/2);  // * 3/2
-              if ( XM7_TheModule->CurrentSampleVolume[chn] > 0x40 )
+        case 0x0e:
+            XM7_TheModule->CurrentSampleVolume[chn] = (XM7_TheModule->CurrentSampleVolume[chn] * 3 / 2); // * 3/2
+            if (XM7_TheModule->CurrentSampleVolume[chn] > 0x40)
                 XM7_TheModule->CurrentSampleVolume[chn] = 0x40;
-              break;
+            break;
 
-    case 0x0f:XM7_TheModule->CurrentSampleVolume[chn] *= 2;  // * 2
-              if ( XM7_TheModule->CurrentSampleVolume[chn] > 0x40 )
+        case 0x0f:
+            XM7_TheModule->CurrentSampleVolume[chn] *= 2; // * 2
+            if (XM7_TheModule->CurrentSampleVolume[chn] > 0x40)
                 XM7_TheModule->CurrentSampleVolume[chn] = 0x40;
-              break;
-  }
+            break;
+    }
 }
 
 static void ApplyVolumeandPanning(u8 chn)
 {
-  u8 volume = XM7_TheModule->CurrentSampleVolume [chn];
-  s8 tremolo = XM7_TheModule->CurrentTremoloVolume [chn];
-  u8 tremormute = XM7_TheModule->CurrentTremorMuting [chn];
+    u8 volume = XM7_TheModule->CurrentSampleVolume[chn];
+    s8 tremolo = XM7_TheModule->CurrentTremoloVolume[chn];
+    u8 tremormute = XM7_TheModule->CurrentTremorMuting[chn];
 
-  if (tremormute) {
-    volume = 0;
-  } else {
-    if (tremolo>0) {
-      if ((volume + tremolo)>0x40)
-          volume=0x40;
-      else
-        volume+=tremolo;
-    } else if (tremolo<0) {
-      if (volume < -tremolo)
-        volume=0;
-      else
-        volume+=tremolo;
+    if (tremormute)
+    {
+        volume = 0;
+    }
+    else
+    {
+        if (tremolo > 0)
+        {
+            if ((volume + tremolo) > 0x40)
+                volume=0x40;
+            else
+                volume += tremolo;
+        }
+        else if (tremolo < 0)
+        {
+            if (volume < -tremolo)
+                volume = 0;
+            else
+                volume += tremolo;
+        }
+
+        // final calculation of volume & panning
+        volume = CalculateFinalVolume(volume, XM7_TheModule->CurrentSampleVolumeEnvelope[chn],
+                                      XM7_TheModule->CurrentSampleVolumeFadeOut[chn]);
     }
 
+    u8 panning = CalculateFinalPanning(chn, XM7_TheModule->CurrentSamplePanning[chn],
+                                       XM7_TheModule->CurrentSamplePanningEnvelope[chn]);
 
-    // final calculation of volume & panning
-    volume  = CalculateFinalVolume  (volume ,XM7_TheModule->CurrentSampleVolumeEnvelope[chn],
-                                             XM7_TheModule->CurrentSampleVolumeFadeOut[chn]);
-  }
-
-
-  u8 panning = CalculateFinalPanning (chn, XM7_TheModule->CurrentSamplePanning[chn],
-                                          XM7_TheModule->CurrentSamplePanningEnvelope[chn]);
-
-  // CHANGE VOLUME & PAN !
-  XM7_lowlevel_setVolumeandPanning (chn,volume,panning);
+    // CHANGE VOLUME & PAN !
+    XM7_lowlevel_setVolumeandPanning(chn, volume, panning);
 }
 
 static void ApplyNewGlobalVolume(void)
 {
-  u8 chn;
-  // for every channel
-  for (chn=0;chn<(XM7_TheModule->NumberofChannels);chn++)
-    ApplyVolumeandPanning (chn);
+    // for every channel
+    for (u8 chn = 0; chn < XM7_TheModule->NumberofChannels; chn++)
+        ApplyVolumeandPanning(chn);
 }
 
 static void CalculateEnvelopeVolume(u8 chn, u8 instrument)
 {
-  u16 i,j, x1=0,x2=0, y1=0,y2=0;
-  XM7_Instrument_Type* CurrInstr = XM7_TheModule->Instrument[instrument-1];
+    u16 i, j, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    XM7_Instrument_Type *CurrInstr = XM7_TheModule->Instrument[instrument - 1];
 
-  // calculate volume for point X
-  j=(CurrInstr->NumberofVolumeEnvelopePoints-1);
-  for (i=0;i<CurrInstr->NumberofVolumeEnvelopePoints;) {
-    // find the closest (left) X point
-    if (CurrInstr->VolumeEnvelopePoint[i].x<=XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn]) {
-        x1=CurrInstr->VolumeEnvelopePoint[i].x;
-      y1=CurrInstr->VolumeEnvelopePoint[i].y;
+    // calculate volume for point X
+    j = CurrInstr->NumberofVolumeEnvelopePoints - 1;
+    for (i = 0; i < CurrInstr->NumberofVolumeEnvelopePoints; )
+    {
+        // find the closest (left) X point
+        if (CurrInstr->VolumeEnvelopePoint[i].x <= XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn])
+        {
+            x1=CurrInstr->VolumeEnvelopePoint[i].x;
+            y1=CurrInstr->VolumeEnvelopePoint[i].y;
+        }
+
+        // find the closest (right) X point
+        if (CurrInstr->VolumeEnvelopePoint[j].x >= XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn])
+        {
+            x2=CurrInstr->VolumeEnvelopePoint[j].x;
+            y2=CurrInstr->VolumeEnvelopePoint[j].y;
+        }
+
+        // move the indexes
+        i++;
+        j--;
     }
 
-    // find the closest (right) X point
-    if (CurrInstr->VolumeEnvelopePoint[j].x>=XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn]) {
-      x2=CurrInstr->VolumeEnvelopePoint[j].x;
-      y2=CurrInstr->VolumeEnvelopePoint[j].y;
+    // calculate the final value between x1 and x2
+    if (x1 == x2)
+    {
+        // the points are the same
+        XM7_TheModule->CurrentSampleVolumeEnvelope[chn] = y1;
     }
-
-    // move the indexes
-    i++;
-    j--;
-  }
-
-  // calculate the final value between x1 and x2
-  if (x1==x2) {
-    // the points are the same
-    XM7_TheModule->CurrentSampleVolumeEnvelope[chn]=y1;
-  } else {
-    // the points are different, interpolation needed!
-    XM7_TheModule->CurrentSampleVolumeEnvelope[chn] = y1 + (y2-y1) * (XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn]-x1) / (x2-x1);
-  }
+    else
+    {
+        // the points are different, interpolation needed!
+        XM7_TheModule->CurrentSampleVolumeEnvelope[chn] = y1 +
+                (y2 - y1) * (XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn]-x1) / (x2 - x1);
+    }
 }
 
 static void CalculateEnvelopePanning(u8 chn, u8 instrument)
 {
-  u16 i,j, x1=0,x2=0, y1=0,y2=0;
-  XM7_Instrument_Type* CurrInstr = XM7_TheModule->Instrument[instrument-1];
+    u16 i, j, x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    XM7_Instrument_Type *CurrInstr = XM7_TheModule->Instrument[instrument - 1];
 
-  // calculate Panning for point X
-  j=(CurrInstr->NumberofPanningEnvelopePoints-1);
-  for (i=0;i<CurrInstr->NumberofPanningEnvelopePoints;) {
-    // find the closest (left) X point
-    if (CurrInstr->PanningEnvelopePoint[i].x<=XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn]) {
-        x1=CurrInstr->PanningEnvelopePoint[i].x;
-      y1=CurrInstr->PanningEnvelopePoint[i].y;
+    // calculate Panning for point X
+    j = CurrInstr->NumberofPanningEnvelopePoints - 1;
+    for (i = 0; i < CurrInstr->NumberofPanningEnvelopePoints; )
+    {
+        // find the closest (left) X point
+        if (CurrInstr->PanningEnvelopePoint[i].x <= XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn])
+        {
+            x1 = CurrInstr->PanningEnvelopePoint[i].x;
+            y1 = CurrInstr->PanningEnvelopePoint[i].y;
+        }
+
+        // find the closest (right) X point
+        if (CurrInstr->PanningEnvelopePoint[j].x >= XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn])
+        {
+            x2 = CurrInstr->PanningEnvelopePoint[j].x;
+            y2 = CurrInstr->PanningEnvelopePoint[j].y;
+        }
+
+        // move the indexes
+        i++;
+        j--;
     }
 
-    // find the closest (right) X point
-    if (CurrInstr->PanningEnvelopePoint[j].x>=XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn]) {
-      x2=CurrInstr->PanningEnvelopePoint[j].x;
-      y2=CurrInstr->PanningEnvelopePoint[j].y;
+    // calculate the final value between x1 and x2
+    if (x1 == x2)
+    {
+        // the points are the same
+        XM7_TheModule->CurrentSamplePanningEnvelope[chn] = y1;
     }
-
-    // move the indexes
-    i++;
-    j--;
-  }
-
-  // calculate the final value between x1 and x2
-  if (x1==x2) {
-    // the points are the same
-    XM7_TheModule->CurrentSamplePanningEnvelope[chn]=y1;
-  } else {
-    // the points are different, interpolation needed!
-    XM7_TheModule->CurrentSamplePanningEnvelope[chn] = y1 + (y2-y1) * (XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn]-x1) / (x2-x1);
-  }
+    else
+    {
+        // the points are different, interpolation needed!
+        XM7_TheModule->CurrentSamplePanningEnvelope[chn] = y1 +
+                (y2 - y1) * (XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn] - x1) / (x2 - x1);
+    }
 }
 
 static void StartEnvelope(u8 chn, u8 startpoint)
 {
-  // we need to start an envelope, if needed
-  // check if envelope is ACTIVE for this instrument
-  if (XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn]-1]->VolumeType & 0x01) {
+    // we need to start an envelope, if needed
+    // check if envelope is ACTIVE for this instrument
+    if (XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn] - 1]->VolumeType & 0x01)
+    {
+        u16 tmp;
+        // volume envelope is ACTIVE: set the variables
+        tmp = XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn] - 1]->VolumeEnvelopePoint[(XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn] - 1]->NumberofVolumeEnvelopePoints) - 1].x;
 
-    u16 tmp;
-    // volume envelope is ACTIVE: set the variables
-    tmp = XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn]-1]->VolumeEnvelopePoint[(XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn]-1]->NumberofVolumeEnvelopePoints)-1].x;
-    if (startpoint>tmp)
-      startpoint=tmp;
-    XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn]=startpoint;
-    XM7_TheModule->CurrentSampleVolumeEnvelopeState[chn]=ENVELOPE_ATTACK;
-    CalculateEnvelopeVolume (chn, XM7_TheModule->CurrentChannelLastInstrument[chn]);
-  } else {
-    // volume envelope is DISABLED: set the variables to default values
-    XM7_TheModule->CurrentSampleVolumeEnvelopeState[chn]=ENVELOPE_NONE;
-    XM7_TheModule->CurrentSampleVolumeEnvelope[chn]=0x40;        // because no envelope!
-  }
+        if (startpoint > tmp)
+            startpoint = tmp;
 
-  // fade:
-  XM7_TheModule->CurrentSampleVolumeFadeOut[chn] = 0x8000;       // reset to maximum (32768)
+        XM7_TheModule->CurrentSampleVolumeEnvelopePoint[chn] = startpoint;
+        XM7_TheModule->CurrentSampleVolumeEnvelopeState[chn] = ENVELOPE_ATTACK;
+        CalculateEnvelopeVolume(chn, XM7_TheModule->CurrentChannelLastInstrument[chn]);
+    }
+    else
+    {
+        // volume envelope is DISABLED: set the variables to default values
+        XM7_TheModule->CurrentSampleVolumeEnvelopeState[chn] = ENVELOPE_NONE;
+        XM7_TheModule->CurrentSampleVolumeEnvelope[chn] = 0x40; // because no envelope!
+    }
 
-  //
-  //
-  // PANNING envelope!
-  //
-  //
+    // fade:
+    XM7_TheModule->CurrentSampleVolumeFadeOut[chn] = 0x8000; // reset to maximum (32768)
 
-  if (XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn]-1]->PanningType & 0x01) {
-    // panning envelope is ACTIVE: set the variables
-    XM7_TheModule->CurrentSamplePanningEnvelopeState[chn]=ENVELOPE_ATTACK;
-    XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn]=0;
-    CalculateEnvelopePanning (chn,XM7_TheModule->CurrentChannelLastInstrument[chn]);
-  } else {
-    // PANNING envelope is DISABLED: set the variables to default values
-    XM7_TheModule->CurrentSamplePanningEnvelopeState[chn]=ENVELOPE_NONE;
-    XM7_TheModule->CurrentSamplePanningEnvelope[chn]=0x20;       // because no envelope!
-  }
+    //
+    //
+    // PANNING envelope!
+    //
+    //
+
+    if (XM7_TheModule->Instrument[XM7_TheModule->CurrentChannelLastInstrument[chn] - 1]->PanningType & 0x01)
+    {
+        // panning envelope is ACTIVE: set the variables
+        XM7_TheModule->CurrentSamplePanningEnvelopeState[chn] = ENVELOPE_ATTACK;
+        XM7_TheModule->CurrentSamplePanningEnvelopePoint[chn] = 0;
+        CalculateEnvelopePanning(chn, XM7_TheModule->CurrentChannelLastInstrument[chn]);
+    }
+    else
+    {
+        // PANNING envelope is DISABLED: set the variables to default values
+        XM7_TheModule->CurrentSamplePanningEnvelopeState[chn] = ENVELOPE_NONE;
+        XM7_TheModule->CurrentSamplePanningEnvelope[chn] = 0x20; // because no envelope!
+    }
 }
 
 static void ElaborateEnvelope(u8 chn, u8 instrument)
@@ -692,8 +749,8 @@ static s8 CalculateVibratoValue(u8 type, u8 pos, u8 dep)
 
 static s8 CalculateTremoloValue(u8 type, u8 pos, u8 dep)
 {
-  // ret is: [-60..+60] (0x0f * 4)
-  return ( CalculateModulatorValue (type, pos) * dep >> 8);
+    // ret is: [-60..+60] (0x0f * 4)
+    return CalculateModulatorValue(type, pos) * dep >> 8;
 }
 
 static u16 DecodeVolumeColumn(u8 chn, u8 volcmd, u8 curtick, u8 EDxInAction)
@@ -2303,58 +2360,51 @@ void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position)
   XM7_TheModule->State = XM7_STATE_PLAYING;
 }
 
-
 void XM7_PlayModule(XM7_ModuleManager_Type* TheModule)
 {
-  XM7_PlayModuleFromPos (TheModule, 0);
+    XM7_PlayModuleFromPos(TheModule, 0);
 }
-
 
 void XM7_StopModule(void)
 {
-  u8 i;
+    // will deactivate the timer IRQ (and stop the channels)
+    TIMER1_CR = 0;
+    irqDisable(IRQ_TIMER1);
 
-  // will deactivate the timer IRQ (and stop the channels)
-  TIMER1_CR = 0;
-  irqDisable(IRQ_TIMER1);
+    for (u8 i = 0; i < XM7_TheModule->NumberofChannels; i++)
+        XM7_lowlevel_stopSound(i);
 
-  for (i=0;i<(XM7_TheModule->NumberofChannels);i++)
-    XM7_lowlevel_stopSound (i);
-
-  // change the state
-  XM7_TheModule->State = XM7_STATE_STOPPED;
+    // change the state
+    XM7_TheModule->State = XM7_STATE_STOPPED;
 }
 
 /*
 void XM7_PauseModule(void)
 {
-  int i;
+    // will deactivate the timer IRQ (and stop the channels)
+    TIMER1_CR = 0;
+    irqDisable(IRQ_TIMER1);
 
-  // will deactivate the timer IRQ (and stop the channels)
-  TIMER1_CR = 0;
-  irqDisable(IRQ_TIMER1);
-
-  for (i=0;i<(XM7_TheModule->NumberofChannels);i++)
-    XM7_lowlevel_pauseSound (i);
+    for (int i = 0; i < XM7_TheModule->NumberofChannels; i++)
+        XM7_lowlevel_pauseSound(i);
 }
 
 void XM7_ResumeModule(void)
 {
-  int i;
-  // then set the timer and make it start!
-  TIMER1_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
-  SetTimerSpeedBPM (XM7_TheModule->CurrentBPM);
-  irqEnable(IRQ_TIMER1);
+    // then set the timer and make it start!
+    TIMER1_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
+    SetTimerSpeedBPM (XM7_TheModule->CurrentBPM);
+    irqEnable(IRQ_TIMER1);
 
-  for (i=0;i<(XM7_TheModule->NumberofChannels);i++)
-    XM7_lowlevel_resumeSound (i);
+    for (int i = 0; i < XM7_TheModule->NumberofChannels; i++)
+        XM7_lowlevel_resumeSound(i);
 }
 */
 
 void XM7_Initialize(void)
 {
-  CalculateVeryFineTunes();
-  // CalculateRealPanningArray (45);   //  (35% of 128 = 44,8)
+    CalculateVeryFineTunes();
+    // CalculateRealPanningArray(45); //  (35% of 128 = 44,8)
 }
 
 

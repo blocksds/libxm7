@@ -41,8 +41,8 @@
 #define XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG    0x02
 
 // Replay style default defines:
-#define XM7_REPLAY_STYLE_FT2                    0x00
-#define XM7_REPLAY_STYLE_PT                     (XM7_REPLAY_STYLE_MOD_PLAYER|XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
+#define XM7_REPLAY_STYLE_FT2    0x00
+#define XM7_REPLAY_STYLE_PT     (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
 
 typedef struct {
     u8 Note;            // 0 = no note; 1..96 = C-0...B-7; 97 = key off
@@ -67,8 +67,8 @@ typedef struct {
 typedef struct {
 
     union {
-    XM7_SampleData_Type* SampleData;
-    XM7_SampleData16_Type* SampleData16;
+        XM7_SampleData_Type* SampleData;
+        XM7_SampleData16_Type* SampleData16;
     };
 
     u32 Length;         // length of data, always in bytes
@@ -391,18 +391,18 @@ typedef struct {
 
 // ARM7 functions
 void XM7_Initialize(void);
-void XM7_PlayModule(XM7_ModuleManager_Type* TheModule);
-void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position);
+void XM7_PlayModule(XM7_ModuleManager_Type *TheModule);
+void XM7_PlayModuleFromPos(XM7_ModuleManager_Type *TheModule, u8 position);
 void XM7_StopModule(void);
 
 #endif // ARM7
 
 // ARM9 functions (... well, you can use them even on ARM7 if you want...)
-u16 XM7_LoadXM(XM7_ModuleManager_Type*, XM7_XMModuleHeader_Type*);
+u16 XM7_LoadXM(XM7_ModuleManager_Type *, XM7_XMModuleHeader_Type *);
 void XM7_UnloadXM(XM7_ModuleManager_Type*);
 
-u16 XM7_LoadMOD(XM7_ModuleManager_Type*, XM7_MODModuleHeader_Type*);
-void XM7_UnloadMOD(XM7_ModuleManager_Type*);
+u16 XM7_LoadMOD(XM7_ModuleManager_Type *, XM7_MODModuleHeader_Type *);
+void XM7_UnloadMOD(XM7_ModuleManager_Type *);
 
 void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, u8 style);
 void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, u8 style, u8 displacement);
