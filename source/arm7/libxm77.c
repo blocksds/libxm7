@@ -73,9 +73,9 @@ static u16 VeryFineTunes[129];
 
 static void CalculateVeryFineTunes(void)
 {
-    for (u8 i = 0; i <= 128; i++)
+    for (int i = 0; i <= 128; i++)
     {
-        u8 j = i >> 3;
+        int j = i >> 3;
         if ((i & 0x07)==0)
         {
             VeryFineTunes[i] = FineTunes[j];
@@ -117,10 +117,10 @@ static u8 FindClosestNoteToAmigaPeriod(u16 period) // note from 0 to 95
     }
 
     // jump notes
-    bottomperiod=topperiod;
+    bottomperiod = topperiod;
     while (topperiod > period)
     {
-        bottomperiod=topperiod;
+        bottomperiod = topperiod;
         note++;
         topperiod = GetAmigaPeriod(note);
     }
@@ -135,10 +135,8 @@ static u8 FindClosestNoteToAmigaPeriod(u16 period) // note from 0 to 95
 /*
 static void CalculateRealPanningArray(u8 halfvalue) // halfvalue = 0..128
 {
-    u8 i, j, k;
-
     // resets values
-    for (i = 0; i <= 128; i++)
+    for (int i = 0; i <= 128; i++)
         RealPanning[i] = 0xff;
 
     // set start values
@@ -146,12 +144,12 @@ static void CalculateRealPanningArray(u8 halfvalue) // halfvalue = 0..128
     RealPanning[128] = 128;
     RealPanning[64] = halfvalue;
 
-    for (j = 5; j > 0; j--)
+    for (int j = 5; j > 0; j--)
     {
         halfvalue >>= 1; // half of halfvalue
         k = 0x01 << j;
 
-        for (i = k; i < 128; i = i + k)
+        for (int i = k; i < 128; i = i + k)
         {
             if (RealPanning[i] == 0xff)
                 RealPanning[i] = RealPanning[i - k] + halfvalue;
@@ -235,8 +233,8 @@ static void XM7_lowlevel_setVolumeandPanning(u8 channel, u8 vol, u8 pan)
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_VOL(channel) = (vol & 0x7f);
-    SCHANNEL_PAN(channel) = (pan & 0x7f);
+    SCHANNEL_VOL(channel) = vol & 0x7f;
+    SCHANNEL_PAN(channel) = pan & 0x7f;
 }
 
 static void XM7_lowlevel_pitchSound (int sampleRate, u8 channel)
@@ -259,9 +257,9 @@ static void XM7_lowlevel_changeSample(const void *data, u32 looplength, u32 loop
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_SOURCE (channel) = (u32)data;
-    SCHANNEL_REPEAT_POINT (channel) = loopstart >> 2;
-    SCHANNEL_LENGTH (channel) = looplength >> 2;
+    SCHANNEL_SOURCE(channel) = (u32)data;
+    SCHANNEL_REPEAT_POINT(channel) = loopstart >> 2;
+    SCHANNEL_LENGTH(channel) = looplength >> 2;
     // BETA: sets sound_repeat even if it's not
     // BETA2: doesn't change that because MOD support only 8 bits samples
     // SCHANNEL_CR_HIGHERBYTE(channel) = (SCHANNEL_ENABLE | SOUND_REPEAT |
@@ -295,7 +293,7 @@ static u8 CalculateFinalVolume(u8 samplevol, u8 envelopevol, u16 fadeoutvol)
     if (tmpvol > 0x7f)
         tmpvol = 0x7f;
 
-    return (tmpvol);
+    return tmpvol;
 }
 
 static u8 CalculateFinalPanning(u8 chn, u8 samplepan, u8 envelopepan)
@@ -430,7 +428,7 @@ static void ApplyVolumeandPanning(u8 chn)
         if (tremolo > 0)
         {
             if ((volume + tremolo) > 0x40)
-                volume=0x40;
+                volume = 0x40;
             else
                 volume += tremolo;
         }
