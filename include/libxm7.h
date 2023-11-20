@@ -5,6 +5,10 @@
 #ifndef LIBXM7_H__
 #define LIBXM7_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <nds/ndstypes.h>
 
 // Error defines:
@@ -406,5 +410,9 @@ void XM7_UnloadMOD(XM7_ModuleManager_Type *);
 
 void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, u8 style);
 void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, u8 style, u8 displacement);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // LIBXM7_H__
