@@ -228,7 +228,7 @@ static XM7_Sample_Type *PrepareNewSample(u32 len, u32 looplen, u8 flags)
 }
 
 // returns 0 if OK, an error otherwise
-u16 XM7_LoadXM(XM7_ModuleManager_Type *Module, const void *XMModule_)
+XM7_Error XM7_LoadXM(XM7_ModuleManager_Type *Module, const void *XMModule_)
 {
     const XM7_XMModuleHeader_Type *XMModule = XMModule_;
 
@@ -722,7 +722,7 @@ u16 XM7_LoadXM(XM7_ModuleManager_Type *Module, const void *XMModule_)
     return 0;
 }
 
-u16 XM7_LoadMOD(XM7_ModuleManager_Type* Module, const void* MODModule_)
+XM7_Error XM7_LoadMOD(XM7_ModuleManager_Type* Module, const void* MODModule_)
 {
     // returns 0 if OK, an error otherwise
 
@@ -1000,12 +1000,13 @@ void XM7_UnloadMOD(XM7_ModuleManager_Type *Module)
     XM7_UnloadXM(Module);
 }
 
-void XM7_SetReplayStyle(XM7_ModuleManager_Type *Module, u8 style)
+void XM7_SetReplayStyle(XM7_ModuleManager_Type *Module, XM7_ReplayStyles style)
 {
     Module->ReplayStyle = style;
 }
 
-void XM7_SetPanningStyle(XM7_ModuleManager_Type *Module, u8 style, u8 displacement)
+void XM7_SetPanningStyle(XM7_ModuleManager_Type *Module, XM7_PanningStyles style,
+                         XM7_PanningDisplacementStyles displacement)
 {
     Module->AmigaPanningEmulation = style;
     Module->AmigaPanningDisplacement = displacement;

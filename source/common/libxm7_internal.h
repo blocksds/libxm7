@@ -18,7 +18,7 @@ extern "C" {
 #define XM7_STATE_PLAYING                       0x6000
 #define XM7_STATE_ERROR                         0x8000
 // In case of error in loading the module, the 15th bit will be set and
-// lower bits will contain an XM7_ERR_* value.
+// lower bits will contain a value from the enum XM7_Error.
 
 typedef struct {
     char FixedText[17];     //  ID text: must be 'Extended module: ' ; will be checked

@@ -11,33 +11,42 @@ extern "C" {
 
 #include <nds/ndstypes.h>
 
-// Error defines:
-#define XM7_ERR_NOT_A_VALID_MODULE              0x01
-#define XM7_ERR_UNKNOWN_MODULE_VERSION          0x02
-#define XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS  0x03
-#define XM7_ERR_UNSUPPORTED_PATTERN_HEADER      0x08
-#define XM7_ERR_INCOMPLETE_PATTERN              0x09
-#define XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER   0x10
-#define XM7_ERR_NOT_ENOUGH_MEMORY               0x100
+// Error types:
+typedef enum {
+    XM7_NO_ERROR                           = 0x00,
+    XM7_ERR_NOT_A_VALID_MODULE             = 0x01,
+    XM7_ERR_UNKNOWN_MODULE_VERSION         = 0x02,
+    XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS = 0x03,
+    XM7_ERR_UNSUPPORTED_PATTERN_HEADER     = 0x08,
+    XM7_ERR_INCOMPLETE_PATTERN             = 0x09,
+    XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER  = 0x10,
+    XM7_ERR_NOT_ENOUGH_MEMORY              = 0x100
+} XM7_Error;
 
-// Panning type defines:
-#define XM7_PANNING_TYPE_NORMAL                 0x00
-#define XM7_PANNING_TYPE_AMIGA                  0x01
+// Panning types:
+typedef enum {
+    XM7_PANNING_TYPE_NORMAL = 0x00,
+    XM7_PANNING_TYPE_AMIGA  = 0x01
+} XM7_PanningStyles;
 
-// Panning displacement defines:
-#define XM7_HARD_PANNING_DISPLACEMENT           0
-#define XM7_MONO_PANNING_DISPLACEMENT           64
-#define XM7_DEFAULT_PANNING_DISPLACEMENT        42
-// 42 = 127/3 circa = panning 1/3 + 2/3
+// Panning displacement types:
+typedef enum {
+    XM7_HARD_PANNING_DISPLACEMENT    = 0,
+    XM7_MONO_PANNING_DISPLACEMENT    = 64,
+    XM7_DEFAULT_PANNING_DISPLACEMENT = 42
+    // 42 = 127/3 circa = panning 1/3 + 2/3
+} XM7_PanningDisplacementStyles;
 
-// Replay style flags:
-#define XM7_REPLAY_STYLE_XM_PLAYER              0x00
-#define XM7_REPLAY_STYLE_MOD_PLAYER             0x01
-#define XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG    0x02
+typedef enum {
+    // Replay style flags:
+    XM7_REPLAY_STYLE_XM_PLAYER           = 0x00,
+    XM7_REPLAY_STYLE_MOD_PLAYER          = 0x01,
+    XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG = 0x02,
 
-// Replay style default defines:
-#define XM7_REPLAY_STYLE_FT2    0x00
-#define XM7_REPLAY_STYLE_PT     (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
+    // Replay style default types:
+    XM7_REPLAY_STYLE_FT2 = 0x00,
+    XM7_REPLAY_STYLE_PT  = (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
+} XM7_ReplayStyles;
 
 typedef struct {
     u8 Note;            // 0 = no note; 1..96 = C-0...B-7; 97 = key off
@@ -149,11 +158,12 @@ typedef struct {
 
     u8 DefaultBPM;                  // 32..255 (BeatPerMinute)
 
-    u8 AmigaPanningEmulation;       // should the panning be 'fixed' in the Amiga style?
-    u8 AmigaPanningDisplacement;    // amiga panning 'displacement'
-                                    // will be added to 0x00 / subtracted to 0x7F
+    // Should panning be 'fixed' in the Amiga style?
+    XM7_PanningStyles AmigaPanningEmulation;
+    // Amiga panning 'displacement' will be added to 0x00 / subtracted to 0x7F
+    XM7_PanningDisplacementStyles AmigaPanningDisplacement;
 
-    u8 ReplayStyle;                 // bit 0: 0 = FT2 style
+    XM7_ReplayStyles ReplayStyle;   // bit 0: 0 = FT2 style
                                     //        1 = MOD player style
                                     // bit 1: on-the-fly sample change flag (1=ON)
 
@@ -270,14 +280,15 @@ void XM7_StopModule(void);
 #endif // ARM7
 
 // ARM9 functions (... well, you can use them even on ARM7 if you want...)
-u16 XM7_LoadXM(XM7_ModuleManager_Type *, const void *);
+XM7_Error XM7_LoadXM(XM7_ModuleManager_Type *, const void *);
 void XM7_UnloadXM(XM7_ModuleManager_Type*);
 
-u16 XM7_LoadMOD(XM7_ModuleManager_Type *, const void *);
+XM7_Error XM7_LoadMOD(XM7_ModuleManager_Type *, const void *);
 void XM7_UnloadMOD(XM7_ModuleManager_Type *);
 
-void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, u8 style);
-void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, u8 style, u8 displacement);
+void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style);
+void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, XM7_PanningStyles style,
+                         XM7_PanningDisplacementStyles displacement);
 
 #ifdef __cplusplus
 }
