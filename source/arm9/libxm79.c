@@ -9,6 +9,8 @@
 
 #include <libxm7.h>
 
+#include "libxm7_internal.h"
+
 // MOD octave 0 difference
 #define AMIGABASEOCTAVE 2
 // AmigaPeriods for MOD "Octave ZERO"

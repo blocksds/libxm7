@@ -8,6 +8,8 @@
 
 #include <libxm7.h>
 
+#include "libxm7_internal.h"
+
 // these are the variables I need to make the module play!
 static XM7_ModuleManager_Type* XM7_TheModule;
 
