@@ -402,10 +402,10 @@ void XM7_StopModule(void);
 #endif // ARM7
 
 // ARM9 functions (... well, you can use them even on ARM7 if you want...)
-u16 XM7_LoadXM(XM7_ModuleManager_Type *, XM7_XMModuleHeader_Type *);
+u16 XM7_LoadXM(XM7_ModuleManager_Type *, const void *);
 void XM7_UnloadXM(XM7_ModuleManager_Type*);
 
-u16 XM7_LoadMOD(XM7_ModuleManager_Type *, XM7_MODModuleHeader_Type *);
+u16 XM7_LoadMOD(XM7_ModuleManager_Type *, const void *);
 void XM7_UnloadMOD(XM7_ModuleManager_Type *);
 
 void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, u8 style);

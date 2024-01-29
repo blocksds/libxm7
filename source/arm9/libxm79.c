@@ -226,8 +226,10 @@ static XM7_Sample_Type *PrepareNewSample(u32 len, u32 looplen, u8 flags)
 }
 
 // returns 0 if OK, an error otherwise
-u16 XM7_LoadXM(XM7_ModuleManager_Type *Module, XM7_XMModuleHeader_Type *XMModule)
+u16 XM7_LoadXM(XM7_ModuleManager_Type *Module, const void *XMModule_)
 {
+    const XM7_XMModuleHeader_Type *XMModule = XMModule_;
+
     // reset these values
     Module->NumberofPatterns = 0;
     Module->NumberofInstruments = 0;
@@ -718,9 +720,11 @@ u16 XM7_LoadXM(XM7_ModuleManager_Type *Module, XM7_XMModuleHeader_Type *XMModule
     return 0;
 }
 
-u16 XM7_LoadMOD(XM7_ModuleManager_Type* Module, XM7_MODModuleHeader_Type* MODModule)
+u16 XM7_LoadMOD(XM7_ModuleManager_Type* Module, const void* MODModule_)
 {
     // returns 0 if OK, an error otherwise
+
+    const XM7_MODModuleHeader_Type* MODModule = MODModule_;
 
     int FLT8Flag;
 
