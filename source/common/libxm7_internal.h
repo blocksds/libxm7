@@ -11,6 +11,15 @@ extern "C" {
 
 #include <nds/ndstypes.h>
 
+// Status bits defines:
+#define XM7_STATE_EMPTY                         0x0000
+#define XM7_STATE_READY                         0x4000
+#define XM7_STATE_STOPPED                       XM7_STATE_READY
+#define XM7_STATE_PLAYING                       0x6000
+#define XM7_STATE_ERROR                         0x8000
+// In case of error in loading the module, the 15th bit will be set and
+// lower bits will contain an XM7_ERR_* value.
+
 typedef struct {
     char FixedText[17];     //  ID text: must be 'Extended module: ' ; will be checked
     char XMModuleName[20];

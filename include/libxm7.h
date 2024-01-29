@@ -20,15 +20,6 @@ extern "C" {
 #define XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER   0x10
 #define XM7_ERR_NOT_ENOUGH_MEMORY               0x100
 
-// Status bits defines:
-#define XM7_STATE_EMPTY                         0x0000
-#define XM7_STATE_READY                         0x4000
-#define XM7_STATE_STOPPED                       XM7_STATE_READY
-#define XM7_STATE_PLAYING                       0x6000
-#define XM7_STATE_ERROR                         0x8000
-// (in case of error in loading the module, the 15th bit will be set and
-//    lower bits will contain the error number as defined above)
-
 // Panning type defines:
 #define XM7_PANNING_TYPE_NORMAL                 0x00
 #define XM7_PANNING_TYPE_AMIGA                  0x01
