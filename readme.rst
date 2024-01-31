@@ -166,15 +166,14 @@ How to use libXM7 files
 =======================
 
 The library consists of one header file (``libxm7.h``) and two archive files
-(``libxm77.a`` and ``libxm79.a``). You should unpack the header file in a
-subdirectory of your include path, say the ``include/libxm7`` directory. On the
-other hand, the archive files should go to your ``libnds`` library path, where
-your other archive files already are. Then you should modify the makefiles for
-your project: locate the line where the libraries are listed
-(``LIBS := -l<library> -l<library>``) and add ``-lxm77`` in the ARM7 makefile.
-Add also ``-lmx79`` in the ARM9 makefile if you plan to use both libXM7 library
-parts. Make sure that ``-lxm77`` appears *before* ``-lnds7`` and that ``-lxm79``
-appears *before* ``-lnds9``.
+(``libxm77.a`` and ``libxm79.a``). You should add the path with the header file
+to your include paths, say the ``include/libxm7`` directory. On the other hand,
+you should add the ``libs`` directory to your linker paths. Then you should
+modify the makefiles for your project: locate the line where the libraries are
+listed (``LIBS := -l<library> -l<library>``) and add ``-lxm77`` in the ARM7
+makefile and ``LIBDIRS := path/to/libxm7/libs``. Add also ``-lmx79`` in the ARM9
+makefile if you plan to use both libXM7 library parts. Make sure that ``-lxm77``
+appears *before* ``-lnds7`` and that ``-lxm79`` appears *before* ``-lnds9``.
 
 How to use libXM7 ARM7 functions
 ================================
@@ -225,7 +224,7 @@ First, include ``libxm7.h`` in your ARM9 source file. The defined functions are:
 
 .. code:: c
 
-    u16 XM7_LoadXM(XM7_ModuleManager_Type*, XM7_XMModuleHeader_Type*)
+    u16 XM7_LoadXM(XM7_ModuleManager_Type*, const void*)
 
 This function loads an XM into the ``XM7_ModuleManager_Type`` structure that allows
 the player to work. Both parameters are pointers; the first one should point to
@@ -238,7 +237,7 @@ loading has a different outcome. Error codes are discussed further on.
 
 .. code:: c
 
-    u16 XM7_LoadMOD(XM7_ModuleManager_Type*, XM7_MODModuleHeader_Type*)
+    u16 XM7_LoadMOD(XM7_ModuleManager_Type*, const void*)
 
 This function loads a MOD into the ``XM7_ModuleManager_Type`` structure that
 allows the player to work. Both parameters are pointers; the first one should
@@ -266,7 +265,7 @@ convenience.
 
 .. code:: c
 
-    void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, u8 style)
+    void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style)
 
 This function sets some parameters that affect the way the module will be
 reproduced, mainly because there are some differencies in some effect behaviour
@@ -276,19 +275,24 @@ For your convenience some constants are defined:
 
 .. code:: c
 
-    #define XM7_REPLAY_STYLE_XM_PLAYER
-    #define XM7_REPLAY_STYLE_MOD_PLAYER
-    #define XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG
+    typedef enum {
+        // Replay style flags:
+        XM7_REPLAY_STYLE_XM_PLAYER           = 0x00,
+        XM7_REPLAY_STYLE_MOD_PLAYER          = 0x01,
+        XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG = 0x02,
 
-    // Currently an alias of XM7_REPLAY_STYLE_XM_PLAYER, the default for XM
-    // modules.
-    #define XM7_REPLAY_STYLE_FT2
+        // Currently an alias of XM7_REPLAY_STYLE_XM_PLAYER, the default for XM
+        // modules.
+        XM7_REPLAY_STYLE_FT2 = 0x00,
 
-    // The default for MOD modules, it's both XM7_REPLAY_STYLE_MOD_PLAYER and
-    // XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG.
-    #define XM7_REPLAY_STYLE_PT
+        // The default for MOD modules
+        XM7_REPLAY_STYLE_PT  = (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
+    } XM7_ReplayStyles;
 
-    void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, u8 style, u8 displacement)
+.. code:: c
+
+    void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, XM7_PanningStyles style,
+                             XM7_PanningDisplacementStyles displacement)
 
 This function configures how the panning will be managed in the reproduction. XM
 format has panning effects, instrument panning settings and even panning
@@ -301,11 +305,12 @@ defined constants for the style:
 
 .. code:: c
 
-    // Panning will be driven by the module. Default for XMs.
-    #define XM7_PANNING_TYPE_NORMAL
-
-    // Panning will be driven by the channel number. Default for MODs.
-    #define XM7_PANNING_TYPE_AMIGA
+    typedef enum {
+        // Panning will be driven by the module. Default for XMs.
+        XM7_PANNING_TYPE_NORMAL = 0x00,
+        // Panning will be driven by the channel number. Default for MODs.
+        XM7_PANNING_TYPE_AMIGA  = 0x01
+    } XM7_PanningStyles;
 
 Then, if you select ``XM7_PANNING_TYPE_AMIGA``, you can specity a value for the
 displacement, this will be the 'distance' from the originally assigned speaker,
@@ -314,16 +319,18 @@ following common constants are defined:
 
 .. code:: c
 
-    // The panning as it was meant on Amiga.
-    #define XM7_HARD_PANNING_DISPLACEMENT
+    // Panning displacement types:
+    typedef enum {
+        // The panning as it was meant on Amiga.
+        XM7_HARD_PANNING_DISPLACEMENT    = 0,
+        // All the channels will be centered.
+        XM7_MONO_PANNING_DISPLACEMENT    = 64,
 
-    // All the channels will be centered.
-    #define XM7_MONO_PANNING_DISPLACEMENT
-
-    // Default. Panning mix: 1/3 of the left channels volume goes to the right
-    // speaker and 1/3 of the right channels volume goes to the left speaker.
-    // Quite common setting among MOD players.
-    #define XM7_DEFAULT_PANNING_DISPLACEMENT
+        // Default. Panning mix: 1/3 of the left channels volume goes to the right
+        // speaker and 1/3 of the right channels volume goes to the left speaker.
+        // Quite common setting among MOD players.
+        XM7_DEFAULT_PANNING_DISPLACEMENT = 42 // 42 = ~127/3 = panning 1/3 + 2/3
+    } XM7_PanningDisplacementStyles;
 
 ``XM7_LoadXM()`` and ``XM7_LoadMOD()`` error codes
 ==================================================
@@ -336,13 +343,16 @@ is greater than ``0x07``.
 
 .. code:: c
 
-    #define XM7_ERR_NOT_A_VALID_MODULE              0x01
-    #define XM7_ERR_UNKNOWN_MODULE_VERSION          0x02
-    #define XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS  0x03
-    #define XM7_ERR_UNSUPPORTED_PATTERN_HEADER      0x08
-    #define XM7_ERR_INCOMPLETE_PATTERN              0x09
-    #define XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER   0x10
-    #define XM7_ERR_NOT_ENOUGH_MEMORY               0x100
+    typedef enum {
+        XM7_NO_ERROR                           = 0x00,
+        XM7_ERR_NOT_A_VALID_MODULE             = 0x01,
+        XM7_ERR_UNKNOWN_MODULE_VERSION         = 0x02,
+        XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS = 0x03,
+        XM7_ERR_UNSUPPORTED_PATTERN_HEADER     = 0x08,
+        XM7_ERR_INCOMPLETE_PATTERN             = 0x09,
+        XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER  = 0x10,
+        XM7_ERR_NOT_ENOUGH_MEMORY              = 0x100
+    } XM7_Error;
 
 Inside libXM7 library
 =====================

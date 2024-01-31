@@ -25,16 +25,23 @@ typedef enum {
 
 // Panning types:
 typedef enum {
+    // Panning will be driven by the module. Default for XMs.
     XM7_PANNING_TYPE_NORMAL = 0x00,
+    // Panning will be driven by the channel number. Default for MODs.
     XM7_PANNING_TYPE_AMIGA  = 0x01
 } XM7_PanningStyles;
 
 // Panning displacement types:
 typedef enum {
+    // The panning as it was meant on Amiga.
     XM7_HARD_PANNING_DISPLACEMENT    = 0,
+    // All the channels will be centered.
     XM7_MONO_PANNING_DISPLACEMENT    = 64,
-    XM7_DEFAULT_PANNING_DISPLACEMENT = 42
-    // 42 = 127/3 circa = panning 1/3 + 2/3
+
+    // Default. Panning mix: 1/3 of the left channels volume goes to the right
+    // speaker and 1/3 of the right channels volume goes to the left speaker.
+    // Quite common setting among MOD players.
+    XM7_DEFAULT_PANNING_DISPLACEMENT = 42 // 42 = ~127/3 = panning 1/3 + 2/3
 } XM7_PanningDisplacementStyles;
 
 typedef enum {
@@ -44,7 +51,11 @@ typedef enum {
     XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG = 0x02,
 
     // Replay style default types:
+
+    // Currently an alias of XM7_REPLAY_STYLE_XM_PLAYER, the default for XM
+    // modules.
     XM7_REPLAY_STYLE_FT2 = 0x00,
+    // The default for MOD modules
     XM7_REPLAY_STYLE_PT  = (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
 } XM7_ReplayStyles;
 
