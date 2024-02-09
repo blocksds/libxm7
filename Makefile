@@ -22,7 +22,7 @@ endif
 # Targets
 # -------
 
-.PHONY: all arm7 arm9 clean install
+.PHONY: all arm7 arm9 docs clean install
 
 all: arm9 arm7
 
@@ -45,3 +45,7 @@ install: all
 	$(V)$(RM) $(INSTALLDIR_ABS)
 	$(V)$(INSTALL) -d $(INSTALLDIR_ABS)
 	$(V)$(CP) -r include lib COPYING $(INSTALLDIR_ABS)
+
+docs:
+	@echo "  DOXYGEN"
+	@doxygen Doxyfile

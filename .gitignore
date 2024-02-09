@@ -1,2 +1,4 @@
-build
-lib
+build/
+lib/
+docs/
+warn.log
