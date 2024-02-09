@@ -1,6 +1,4 @@
-======
-libxm7
-======
+# libxm7
 
 A C library to play XM (and MOD) modules on Nintendo DS using only ARM7
 resources (thus freeing your ARM9 from that task).
@@ -9,16 +7,15 @@ Homepage: http://wcms.teleion.it/users/cgq/nds/libxm7/
 
 This is released as-is, under the MIT license.
 
-- Demos of `version 0.81 <https://www.youtube.com/watch?v=DOTtW3GKVTs>`_ and
-  `version 0.93 <https://vimeo.com/3364671>`_. Thanks, Raina!
+- Demos of [version 0.81](https://www.youtube.com/watch?v=DOTtW3GKVTs) and
+  [version 0.93](https://vimeo.com/3364671). Thanks, Raina!
 
-- `AngunaDS <http://www.tolberts.net/anguna/>`_ (the *first* homebrew featuring
+- [AngunaDS](http://www.tolberts.net/anguna/) (the *first* homebrew featuring
   libXM7)
 
-`Changelog <./changelog.txt>`_
+[Changelog](./changelog.txt)
 
-libXM7 Replay features
-======================
+## libXM7 Replay features
 
 The current version of libXM7 (1.06) can play XMs featuring the following
 characteristics:
@@ -44,73 +41,73 @@ characteristics:
 
 libXM7 has **complete** effect support. For reference, these are the effects:
 
-- ``0xy`` Arpeggio
-- ``1xx`` Portamento up (M)
-- ``2xx`` Portamento down (M)
-- ``3xx`` Portamento to note (M)
-- ``4xy`` Vibrato (M)
-- ``5xy`` Portamento to note with volume slide (M)
-- ``6xy`` Vibrato with volume slide (M)
-- ``7xy`` Tremolo (M)
-- ``8xx`` Set note panning
-- ``9xx`` Set sample offset (M)
-- ``Axy`` Slide note volume up or down (M)
-- ``Bxx`` Jump to position
-- ``Cxx`` Set note volume
-- ``Dxx`` Pattern break
-- ``E1x`` Fine portamento up (M)
-- ``E2x`` Fine portamento down (M)
-- ``E3x`` Glissando control
-- ``E4x`` Vibrato control
-- ``E5x`` Instrument finetune
-- ``E6x`` Pattern loop
-- ``E7x`` Tremolo control
-- ``E8x`` Set note panning
-- ``E9x`` Retrig note
-- ``EAx`` Slide note fine volume up (M)
-- ``EBx`` Slide note fine volume down (M)
-- ``ECx`` Note cut
-- ``EDx`` Note delay
-- ``EEx`` Pattern delay
-- ``Fxx`` Set song speed
-- ``Gxx`` Set global volume
-- ``Hxy`` Slide global volume up or down (M)
-- ``Kxx`` Key off
-- ``Lxx`` Set envelope position
-- ``Pxy`` Panning slide (M)
-- ``Rxy`` Retrig note with volume slide (M)
-- ``Txy`` Tremor (M)
-- ``X1x`` Extra fine portamento up (M)
-- ``X2x`` Extra fine portamento down (M)
+- `0xy` Arpeggio
+- `1xx` Portamento up (M)
+- `2xx` Portamento down (M)
+- `3xx` Portamento to note (M)
+- `4xy` Vibrato (M)
+- `5xy` Portamento to note with volume slide (M)
+- `6xy` Vibrato with volume slide (M)
+- `7xy` Tremolo (M)
+- `8xx` Set note panning
+- `9xx` Set sample offset (M)
+- `Axy` Slide note volume up or down (M)
+- `Bxx` Jump to position
+- `Cxx` Set note volume
+- `Dxx` Pattern break
+- `E1x` Fine portamento up (M)
+- `E2x` Fine portamento down (M)
+- `E3x` Glissando control
+- `E4x` Vibrato control
+- `E5x` Instrument finetune
+- `E6x` Pattern loop
+- `E7x` Tremolo control
+- `E8x` Set note panning
+- `E9x` Retrig note
+- `EAx` Slide note fine volume up (M)
+- `EBx` Slide note fine volume down (M)
+- `ECx` Note cut
+- `EDx` Note delay
+- `EEx` Pattern delay
+- `Fxx` Set song speed
+- `Gxx` Set global volume
+- `Hxy` Slide global volume up or down (M)
+- `Kxx` Key off
+- `Lxx` Set envelope position
+- `Pxy` Panning slide (M)
+- `Rxy` Retrig note with volume slide (M)
+- `Txy` Tremor (M)
+- `X1x` Extra fine portamento up (M)
+- `X2x` Extra fine portamento down (M)
 
 (M) Means that this effect has "memory".
 
 The volume column effects support is also **complete**. For your reference the
 effects follows:
 
-- ``xx`` Set note volume (``0x10-0x50``)
-- ``Dx`` Slide note volume down (``0x60-0x6F``)
-- ``Ux`` Slide note volume up (``0x70-0x7F``)
-- ``dx`` Slide note fine volume down (``0x80-0x8F``)
-- ``ux`` Slide note fine volume up (``0x90-0x9F``)
-- ``Sx`` Set vibrato speed (``0xA0-0xAF``)
-- ``Vx`` Vibrato (``0xB0-0xBF``)
-- ``Px`` Set note panning (``0xC0-0xCF``)
-- ``Lx`` Slide note panning left (``0xD0-0xDF``)
-- ``Rx`` Slide note panning right (``0xE0-0xEF``)
-- ``Mx`` Portamento to note (``0xF0-0xFF``)
+- `xx` Set note volume (`0x10-0x50`)
+- `Dx` Slide note volume down (`0x60-0x6F`)
+- `Ux` Slide note volume up (`0x70-0x7F`)
+- `dx` Slide note fine volume down (`0x80-0x8F`)
+- `ux` Slide note fine volume up (`0x90-0x9F`)
+- `Sx` Set vibrato speed (`0xA0-0xAF`)
+- `Vx` Vibrato (`0xB0-0xBF`)
+- `Px` Set note panning (`0xC0-0xCF`)
+- `Lx` Slide note panning left (`0xD0-0xDF`)
+- `Rx` Slide note panning right (`0xE0-0xEF`)
+- `Mx` Portamento to note (`0xF0-0xFF`)
 
 There's a very good document explaining XM effects (and volume column effects)
-usage `here <https://milkytracker.org/docs/MilkyTracker.html>`_, on MilkyTracker
+usage [here](https://milkytracker.org/docs/MilkyTracker.html), on MilkyTracker
 website.
 
 The library can play also MODs featuring the following characteristics:
 
-- ``M.K.``, ``M!K!`` and ``FLT4`` module subtypes 4 channels modules
-- ``OCTA``, ``CD81`` and ``FLT8`` (*) module subtypes 8 channels modules
-- ``TDZx`` module subtype 1 to 3 channels modules
-- ``xCHN`` module subtype 2 to 9 channels modules
-- ``xxCH`` module subtype 10 to 16 channels modules
+- `M.K.`, `M!K!` and `FLT4` module subtypes 4 channels modules
+- `OCTA`, `CD81` and `FLT8` (\*) module subtypes 8 channels modules
+- `TDZx` module subtype 1 to 3 channels modules
+- `xCHN` module subtype 2 to 9 channels modules
+- `xxCH` module subtype 10 to 16 channels modules
 - Distinct effect column for each channel
 - Module length up to 128 patterns
 - Module can contain up to 256 different patterns of fixed length of 64 lines
@@ -121,10 +118,9 @@ The library can play also MODs featuring the following characteristics:
 Of course libXM7 has **complete** MOD effect support (because they're a subset of
 XM effects).
 
-(*) Yeah, I mean ``FLT8`` really.
+(\*) Yeah, I mean `FLT8` really.
 
-Getting the most of your tune
-=============================
+## Getting the most of your tune
 
 Since the library doesn't manipulate the samples data directly but simply uses
 the Nintendo DS hardware 16 digital channels to replay samples, there are some
@@ -158,49 +154,47 @@ of the sample is very short.
 Finally, it's impossible for the DS hardware to start playing a sample that has
 a loop from inside the loop from other position but the beginning. This means
 that you should put some care in preparing your samples having loops if you plan
-to use the ``9xx`` (*Set sample offset*) effect on them. Anyway there are no
+to use the `9xx` (*Set sample offset*) effect on them. Anyway there are no
 problems if you simply plan to skip samples of the **non-repeating** part of a
 sample with loop.
 
-How to use libXM7 files
-=======================
+## How to use libXM7 files
 
-The library consists of one header file (``libxm7.h``) and two archive files
-(``libxm77.a`` and ``libxm79.a``). You should add the path with the header file
-to your include paths, say the ``include/libxm7`` directory. On the other hand,
-you should add the ``libs`` directory to your linker paths. Then you should
+The library consists of one header file (`libxm7.h`) and two archive files
+(`libxm77.a` and `libxm79.a`). You should add the path with the header file
+to your include paths, say the `include/libxm7` directory. On the other hand,
+you should add the `libs` directory to your linker paths. Then you should
 modify the makefiles for your project: locate the line where the libraries are
-listed (``LIBS := -l<library> -l<library>``) and add ``-lxm77`` in the ARM7
-makefile and ``LIBDIRS := path/to/libxm7/libs``. Add also ``-lmx79`` in the ARM9
-makefile if you plan to use both libXM7 library parts. Make sure that ``-lxm77``
-appears *before* ``-lnds7`` and that ``-lxm79`` appears *before* ``-lnds9``.
+listed (`LIBS := -l<library> -l<library>`) and add `-lxm77` in the ARM7
+makefile and `LIBDIRS := path/to/libxm7/libs`. Add also `-lmx79` in the ARM9
+makefile if you plan to use both libXM7 library parts. Make sure that `-lxm77`
+appears *before* `-lnds7` and that `-lxm79` appears *before* `-lnds9`.
 
-How to use libXM7 ARM7 functions
-================================
+## How to use libXM7 ARM7 functions
 
-First of all, you should include ``libxm7.h`` in your ARM7 source file. Doing it
+First of all, you should include `libxm7.h` in your ARM7 source file. Doing it
 will give you access to the defined functions:
 
-.. code:: c
-
-    void XM7_Initialize(void)
+```c
+void XM7_Initialize(void)
+```
 
 This function should be called just once, before calling any other function. It
 performs some important necessary initialization.
 
-.. code:: c
-
-    void XM7_PlayModule(XM7_ModuleManager_Type* TheModule)
+```c
+void XM7_PlayModule(XM7_ModuleManager_Type* TheModule)
+```
 
 This function makes the module start playing. It doesn't turn on the speakers,
 nor does it set the master volume: all that is up to you. The following
 parameter should be passed to the function: a pointer to a
-``XM7_ModuleManager_Type`` structure where an XM module should have already been
+`XM7_ModuleManager_Type` structure where an XM module should have already been
 loaded.
 
-.. code:: c
-
-    void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position)
+```c
+void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position)
+```
 
 This function makes the module start playing from a given position. It works
 like the previous one but requires one more parameter: the position (in the
@@ -210,89 +204,88 @@ instruments in a single XM file. When it's required to switch to a different
 tune you would then simply stop the module and play the same module again just
 starting from a different position.
 
-.. code:: c
-
-    void XM7_StopModule(void)
+```c
+void XM7_StopModule(void)
+```
 
 This function stops the module and it abruptly interrupts every sample of the
 module being played.
 
-How to use libXM7 ARM9 functions
-================================
+## How to use libXM7 ARM9 functions
 
-First, include ``libxm7.h`` in your ARM9 source file. The defined functions are:
+First, include `libxm7.h` in your ARM9 source file. The defined functions are:
 
-.. code:: c
+```c
+u16 XM7_LoadXM(XM7_ModuleManager_Type*, const void*)
+```
 
-    u16 XM7_LoadXM(XM7_ModuleManager_Type*, const void*)
-
-This function loads an XM into the ``XM7_ModuleManager_Type`` structure that allows
+This function loads an XM into the `XM7_ModuleManager_Type` structure that allows
 the player to work. Both parameters are pointers; the first one should point to
 an already allocated structure where this function will load the XM module,
 whereas the second is the pointer to a copy in memory of a whole XM file. This
-function uses ``malloc()`` to allocate space for patterns, instruments and
+function uses `malloc()` to allocate space for patterns, instruments and
 samples into the heap. Unlike the other functions, this function does return a
 value, which is 0 when the loading is successful and a different value when the
 loading has a different outcome. Error codes are discussed further on.
 
-.. code:: c
+```c
+u16 XM7_LoadMOD(XM7_ModuleManager_Type*, const void*)
+```
 
-    u16 XM7_LoadMOD(XM7_ModuleManager_Type*, const void*)
-
-This function loads a MOD into the ``XM7_ModuleManager_Type`` structure that
+This function loads a MOD into the `XM7_ModuleManager_Type` structure that
 allows the player to work. Both parameters are pointers; the first one should
 point to an already allocated structure where this function will load the
 module, whereas the second is the pointer to a copy in memory of a whole MOD
-file. This function uses ``malloc()`` to allocate space for patterns,
+file. This function uses `malloc()` to allocate space for patterns,
 instruments and samples into the heap. Unlike the other functions, this function
 does return a value, which is 0 when the loading is successful and a different
 value when the loading has a different outcome. Error codes are discussed
 further on.
 
-.. code:: c
-
-    void XM7_UnloadXM(XM7_ModuleManager_Type*)
+```c
+void XM7_UnloadXM(XM7_ModuleManager_Type*)
+```
 
 This function frees all the allocated memory thus unloading the module. However,
-it doesn't deallocate the ``XM7_ModuleManager_Type`` structure.
+it doesn't deallocate the `XM7_ModuleManager_Type` structure.
 
-.. code:: c
+```c
+void XM7_UnloadMOD(XM7_ModuleManager_Type*)
+```
 
-    void XM7_UnloadMOD(XM7_ModuleManager_Type*)
-
-This function is simply an alias of the ``XM7_UnloadXM()`` function, for your
+This function is simply an alias of the `XM7_UnloadXM()` function, for your
 convenience.
 
-.. code:: c
-
-    void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style)
+```c
+void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style)
+```
 
 This function sets some parameters that affect the way the module will be
 reproduced, mainly because there are some differencies in some effect behaviour
-if used in XM or MOD modules. Actually this simply affects the effect ``0xy``
+if used in XM or MOD modules. Actually this simply affects the effect `0xy`
 (*Arpeggio*) and activates/deactivates the 'on-the-fly sample change' feature.
 For your convenience some constants are defined:
 
-.. code:: c
+```c
+typedef enum {
+    // Replay style flags:
+    XM7_REPLAY_STYLE_XM_PLAYER           = 0x00,
+    XM7_REPLAY_STYLE_MOD_PLAYER          = 0x01,
+    XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG = 0x02,
 
-    typedef enum {
-        // Replay style flags:
-        XM7_REPLAY_STYLE_XM_PLAYER           = 0x00,
-        XM7_REPLAY_STYLE_MOD_PLAYER          = 0x01,
-        XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG = 0x02,
+    // Currently an alias of XM7_REPLAY_STYLE_XM_PLAYER, the default for XM
+    // modules.
+    XM7_REPLAY_STYLE_FT2 = 0x00,
 
-        // Currently an alias of XM7_REPLAY_STYLE_XM_PLAYER, the default for XM
-        // modules.
-        XM7_REPLAY_STYLE_FT2 = 0x00,
+    // The default for MOD modules
+    XM7_REPLAY_STYLE_PT  = (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
+} XM7_ReplayStyles;
+```
 
-        // The default for MOD modules
-        XM7_REPLAY_STYLE_PT  = (XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG)
-    } XM7_ReplayStyles;
-
-.. code:: c
-
-    void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, XM7_PanningStyles style,
-                             XM7_PanningDisplacementStyles displacement)
+```c
+void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, XM7_PanningStyles style,
+                         XM7_PanningDisplacementStyles displacement)
+```
 
 This function configures how the panning will be managed in the reproduction. XM
 format has panning effects, instrument panning settings and even panning
@@ -303,67 +296,65 @@ left, then the opposite for the next two and swap again for the fifth and sixth
 and so on (R-L-L-R-R-L-L-R ...). For your convenience again there are some
 defined constants for the style:
 
-.. code:: c
+```c
+typedef enum {
+    // Panning will be driven by the module. Default for XMs.
+    XM7_PANNING_TYPE_NORMAL = 0x00,
+    // Panning will be driven by the channel number. Default for MODs.
+    XM7_PANNING_TYPE_AMIGA  = 0x01
+} XM7_PanningStyles;
+```
 
-    typedef enum {
-        // Panning will be driven by the module. Default for XMs.
-        XM7_PANNING_TYPE_NORMAL = 0x00,
-        // Panning will be driven by the channel number. Default for MODs.
-        XM7_PANNING_TYPE_AMIGA  = 0x01
-    } XM7_PanningStyles;
-
-Then, if you select ``XM7_PANNING_TYPE_AMIGA``, you can specity a value for the
+Then, if you select `XM7_PANNING_TYPE_AMIGA`, you can specity a value for the
 displacement, this will be the 'distance' from the originally assigned speaker,
 maximum value is 127 (which actually will completely swap channels...). The
 following common constants are defined:
 
-.. code:: c
+```c
+// Panning displacement types:
+typedef enum {
+    // The panning as it was meant on Amiga.
+    XM7_HARD_PANNING_DISPLACEMENT    = 0,
+    // All the channels will be centered.
+    XM7_MONO_PANNING_DISPLACEMENT    = 64,
 
-    // Panning displacement types:
-    typedef enum {
-        // The panning as it was meant on Amiga.
-        XM7_HARD_PANNING_DISPLACEMENT    = 0,
-        // All the channels will be centered.
-        XM7_MONO_PANNING_DISPLACEMENT    = 64,
+    // Default. Panning mix: 1/3 of the left channels volume goes to the right
+    // speaker and 1/3 of the right channels volume goes to the left speaker.
+    // Quite common setting among MOD players.
+    XM7_DEFAULT_PANNING_DISPLACEMENT = 42 // 42 = ~127/3 = panning 1/3 + 2/3
+} XM7_PanningDisplacementStyles;
+```
 
-        // Default. Panning mix: 1/3 of the left channels volume goes to the right
-        // speaker and 1/3 of the right channels volume goes to the left speaker.
-        // Quite common setting among MOD players.
-        XM7_DEFAULT_PANNING_DISPLACEMENT = 42 // 42 = ~127/3 = panning 1/3 + 2/3
-    } XM7_PanningDisplacementStyles;
-
-``XM7_LoadXM()`` and ``XM7_LoadMOD()`` error codes
-==================================================
+## `XM7_LoadXM()` and `XM7_LoadMOD()` error codes
 
 Here's the list of the error code defines for your reference. They are all fatal
 errors; the loading will be interrupted and it won't be possible to play the
-module. The ``XM7_UnloadXM()`` function (or its alias ``XM7_UnloadMOD()``)
+module. The `XM7_UnloadXM()` function (or its alias `XM7_UnloadMOD()`)
 should be called anyway to free the already allocated memory when the error code
-is greater than ``0x07``.
+is greater than `0x07`.
 
-.. code:: c
+```c
+typedef enum {
+    XM7_NO_ERROR                           = 0x00,
+    XM7_ERR_NOT_A_VALID_MODULE             = 0x01,
+    XM7_ERR_UNKNOWN_MODULE_VERSION         = 0x02,
+    XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS = 0x03,
+    XM7_ERR_UNSUPPORTED_PATTERN_HEADER     = 0x08,
+    XM7_ERR_INCOMPLETE_PATTERN             = 0x09,
+    XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER  = 0x10,
+    XM7_ERR_NOT_ENOUGH_MEMORY              = 0x100
+} XM7_Error;
+```
 
-    typedef enum {
-        XM7_NO_ERROR                           = 0x00,
-        XM7_ERR_NOT_A_VALID_MODULE             = 0x01,
-        XM7_ERR_UNKNOWN_MODULE_VERSION         = 0x02,
-        XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS = 0x03,
-        XM7_ERR_UNSUPPORTED_PATTERN_HEADER     = 0x08,
-        XM7_ERR_INCOMPLETE_PATTERN             = 0x09,
-        XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER  = 0x10,
-        XM7_ERR_NOT_ENOUGH_MEMORY              = 0x100
-    } XM7_Error;
-
-Inside libXM7 library
-=====================
+## Inside libXM7 library
 
 libXM7 is a combined library: it has one part that is linked to the ARM9
 executable and another part that is linked to the ARM7 executable. However the
 library implements no means of communication between the processors. So it's up
 to the programmer to choose a suitable way to communicate, let's say, to the
 ARM7 where the ARM9 has loaded the module that the former should play. Also, the
-programmer is supposed to ensure that the ``XM7_StopModule()`` gets executed on
-ARM7 before ``XM7_UnloadXM()`` gets executed on ARM9. By the way, you can even
+programmer is supposed to ensure that the `XM7_StopModule()` gets executed on
+ARM7 before `XM7_UnloadXM()` gets executed on ARM9. By the way, you can even
 write your own module loader (for instance one that reads directly from FAT) and
 not use the libXM7 ARM9 part of that library. So, since the ARM7 part is the
 core of this library, it can be used independently.
@@ -391,29 +382,27 @@ As already mentioned, it doesn't interact with anything else, in particular:
 
 So you have to take care of both according to your needs.
 
-Contacts
-========
+## Contacts
 
 Feel free to contact me through e-mail (my e-address is
-``<my_nickname_goes_here>@yahoo.com``) or, even better, leave a GitHub issue in
+`<my_nickname_goes_here>@yahoo.com`) or, even better, leave a GitHub issue in
 this repository.  Bugs or replay accuracy problem reporting and every kind of
 feedback is always welcome!
 
-Acknowledgements
-================
+## Acknowledgements
 
 This work would have never seen the light if it wasn't for the following:
 
 - devkitARM & libnds
 - my friend (c)runX 's help in teaching me what's an XM, back in 1997.
-- `raina <http://modarchive.org/index.php?request=view_profile&query=80599>`_'s
+- [raina](http://modarchive.org/index.php?request=view_profile&query=80599>)'s
   priceless work (if you think that this library accuracy is good then you
   should know it's mainly because of his help!) and wonderful modules.
-- `Strobe <http://modarchive.org/index.php?request=view_profile&query=69549>`_'s
+- [Strobe](http://modarchive.org/index.php?request=view_profile&query=69549)'s
   great help in finding lots of bugs while implementing new effects, and his
   cool modules.
-- Rhinostrich, setrodox, Magic Fred, Romeo Knight, ogge and `Kmuland
-  <http://modarchive.org/index.php?request=view_profile&query=81380>`_ for their
-  modules and the permission to use them.
+- Rhinostrich, setrodox, Magic Fred, Romeo Knight, ogge and
+  [Kmuland](http://modarchive.org/index.php?request=view_profile&query=81380)
+  for their modules and the permission to use them.
 
-Sverx, 2011-01-27. Last modified 2023-03-28 by AntonioND.
+Sverx, 2011-01-27. Last modified 2024-02-09 by AntonioND.
