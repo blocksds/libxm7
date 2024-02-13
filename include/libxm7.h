@@ -15,6 +15,9 @@ extern "C" {
 
 #include <nds/ndstypes.h>
 
+/// @defgroup libxm7_types libXM7 definitions and types.
+/// @{
+
 /// List of the error codes for XM7_LoadXM() and XM7_LoadMOD().
 ///
 /// They are all fatal errors; the loading will be interrupted and it won't be
@@ -296,6 +299,10 @@ typedef struct {
 
 } XM7_ModuleManager_Type;
 
+/// @}
+/// @defgroup libxm7_arm7 libXM7 ARM7 functions.
+/// @{
+
 #ifdef ARM7
 
 /// Perform initialization of the library.
@@ -333,7 +340,12 @@ void XM7_StopModule(void);
 
 #endif // ARM7
 
-// ARM9 functions (... well, you can use them even on ARM7 if you want...)
+/// @}
+/// @defgroup libxm7_arm9 libXM7 ARM9 functions.
+///
+/// ARM9 functions (... well, you can use them even on ARM7 if you want...).
+///
+/// @{
 
 /// Load an XM into a `XM7_ModuleManager_Type` structure.
 ///
@@ -412,6 +424,8 @@ void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style);
 /// @param displacement Displacement style.
 void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, XM7_PanningStyles style,
                          XM7_PanningDisplacementStyles displacement);
+
+/// @}
 
 #ifdef __cplusplus
 }

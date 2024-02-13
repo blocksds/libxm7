@@ -8,7 +8,9 @@ resources (thus freeing your ARM9 from that task).
 
 ## API documentation
 
-@ref libxm7.h "Global libXM7 header"
+- @ref libxm7_types
+- @ref libxm7_arm9
+- @ref libxm7_arm7
 
 ## libXM7 Replay features
 
