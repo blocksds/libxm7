@@ -20,15 +20,25 @@ extern "C" {
 /// They are all fatal errors; the loading will be interrupted and it won't be
 /// possible to play the module. The `XM7_UnloadXM()` function (or its alias
 /// `XM7_UnloadMOD()`) should be called anyway to free the already allocated
-/// memory when the error code is greater than `0x07`.
+/// memory when the error code is greater than `0x07` (
+/// XM7_ERR_UNSUPPORTED_PATTERN_HEADER, XM7_ERR_INCOMPLETE_PATTERN,
+/// XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER and XM7_ERR_NOT_ENOUGH_MEMORY)
 typedef enum {
+    /// No error
     XM7_NO_ERROR                           = 0x00,
+    /// Not a valid module
     XM7_ERR_NOT_A_VALID_MODULE             = 0x01,
+    /// Unknown module version
     XM7_ERR_UNKNOWN_MODULE_VERSION         = 0x02,
+    /// Unsupported number of channels
     XM7_ERR_UNSUPPORTED_NUMBER_OF_CHANNELS = 0x03,
+    /// Unsupported pattern header
     XM7_ERR_UNSUPPORTED_PATTERN_HEADER     = 0x08,
+    /// Incomplete pattern
     XM7_ERR_INCOMPLETE_PATTERN             = 0x09,
+    /// Unsupported instrument header
     XM7_ERR_UNSUPPORTED_INSTRUMENT_HEADER  = 0x10,
+    /// Not enough memory to allocate internal player structures
     XM7_ERR_NOT_ENOUGH_MEMORY              = 0x100
 } XM7_Error;
 
