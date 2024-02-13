@@ -261,18 +261,15 @@ typedef enum {
     XM7_DEFAULT_PANNING_DISPLACEMENT = 42
 } XM7_PanningDisplacementStyles;
 
+/// Replay style flags.
 typedef enum {
-    // Replay style flags:
     XM7_REPLAY_STYLE_XM_PLAYER           = 0x00,
     XM7_REPLAY_STYLE_MOD_PLAYER          = 0x01,
     XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG = 0x02,
 
-    // Replay style default types:
-
-    // Currently an alias of XM7_REPLAY_STYLE_XM_PLAYER, the default for XM
-    // modules.
-    XM7_REPLAY_STYLE_FT2 = 0x00,
-    // The default for MOD modules
+    /// Alias of XM7_REPLAY_STYLE_XM_PLAYER. The default for XM modules.
+    XM7_REPLAY_STYLE_FT2 = XM7_REPLAY_STYLE_XM_PLAYER,
+    /// The default for MOD modules
     XM7_REPLAY_STYLE_PT  = XM7_REPLAY_STYLE_MOD_PLAYER | XM7_REPLAY_ONTHEFLYSAMPLECHANGE_FLAG
 } XM7_ReplayStyles;
 
