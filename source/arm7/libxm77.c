@@ -277,11 +277,11 @@ static void SetTimerSpeedBPM(u8 BPM)
 
     // set the timer
     u16 timer = 1963710 / (BPM * 24);
-    TIMER1_DATA = - timer;
+    TIMER0_DATA = -timer;
 
     // start/restart it!
-    TIMER1_CR &= ~TIMER_ENABLE;
-    TIMER1_CR |= TIMER_ENABLE;
+    TIMER0_CR &= ~TIMER_ENABLE;
+    TIMER0_CR |= TIMER_ENABLE;
 }
 
 static u8 CalculateFinalVolume(u8 samplevol, u8 envelopevol, u16 fadeoutvol)
@@ -1962,9 +1962,9 @@ static void ChangeSample(u8 chn)
     }
 }
 
-static void Timer1Handler(void)
+static void Timer0Handler(void)
 {
-    // this gets called each time Timer1 'overflows'
+    // this gets called each time Timer 0 'overflows'
     XM7_SingleNoteArray_Type *CurrNoteLine;
     XM7_SingleNote_Type *CurrNote = NULL;
 
@@ -2604,12 +2604,12 @@ void XM7_PlayModuleFromPos(XM7_ModuleManager_Type* TheModule, u8 position)
 
     // ... GO!
 
-    // 1st: set up the IRQ handler for the timer1 and enable the IRQ.
-    irqSet(IRQ_TIMER1, Timer1Handler);
-    irqEnable(IRQ_TIMER1);
+    // 1st: set up the IRQ handler for the timer 0 and enable the IRQ.
+    irqSet(IRQ_TIMER0, Timer0Handler);
+    irqEnable(IRQ_TIMER0);
 
     // then set the timer and make it start!
-    TIMER1_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
+    TIMER0_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
     SetTimerSpeedBPM(XM7_TheModule->DefaultBPM);
 
     // set engine state
@@ -2624,8 +2624,8 @@ void XM7_PlayModule(XM7_ModuleManager_Type* TheModule)
 void XM7_StopModule(void)
 {
     // will deactivate the timer IRQ (and stop the channels)
-    TIMER1_CR = 0;
-    irqDisable(IRQ_TIMER1);
+    TIMER0_CR = 0;
+    irqDisable(IRQ_TIMER0);
 
     for (u8 i = 0; i < XM7_TheModule->NumberofChannels; i++)
         XM7_lowlevel_stopSound(i);
@@ -2638,8 +2638,8 @@ void XM7_StopModule(void)
 void XM7_PauseModule(void)
 {
     // will deactivate the timer IRQ (and stop the channels)
-    TIMER1_CR = 0;
-    irqDisable(IRQ_TIMER1);
+    TIMER0_CR = 0;
+    irqDisable(IRQ_TIMER0);
 
     for (int i = 0; i < XM7_TheModule->NumberofChannels; i++)
         XM7_lowlevel_pauseSound(i);
@@ -2648,9 +2648,9 @@ void XM7_PauseModule(void)
 void XM7_ResumeModule(void)
 {
     // then set the timer and make it start!
-    TIMER1_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
+    TIMER0_CR = TIMER_DIV_1024 | TIMER_IRQ_REQ;
     SetTimerSpeedBPM (XM7_TheModule->CurrentBPM);
-    irqEnable(IRQ_TIMER1);
+    irqEnable(IRQ_TIMER0);
 
     for (int i = 0; i < XM7_TheModule->NumberofChannels; i++)
         XM7_lowlevel_resumeSound(i);
@@ -2682,7 +2682,7 @@ void XM7_Initialize(void)
 
 /*
     u16 timer = (1963710 / XM7_TheModule->DefaultBPM) / (6 * 4);
-    TIMER1_DATA = - timer;
+    TIMER0_DATA = - timer;
 */
 
 

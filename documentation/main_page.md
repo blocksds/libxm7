@@ -192,7 +192,7 @@ More precisely, it interacts with:
   9, are free. They will remain completely untouched by the library so that you
   can use your libnds sound functions directly without any modification needed.
 
-- The timer number 1 on ARM7: it's the heartbeat that imposes the correct speed
+- The timer number 0 on ARM7: it's the heartbeat that imposes the correct speed
   to the module. Of course, the library sets the corresponding interrupt too.
 
 As already mentioned, it doesn't interact with anything else, in particular:
