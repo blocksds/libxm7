@@ -202,4 +202,3 @@ As already mentioned, it doesn't interact with anything else, in particular:
 - It doesn't raise or lower the main volume.
 
 So you have to take care of both according to your needs.
-
