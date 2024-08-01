@@ -317,7 +317,8 @@ void XM7_Initialize(void);
 /// pointer to a XM7_ModuleManager_Type structure where an XM module should have
 /// already been loaded.
 ///
-/// @param TheModule Module to be played.
+/// @param TheModule
+///     Module to be played.
 void XM7_PlayModule(XM7_ModuleManager_Type *TheModule);
 
 /// This function makes the module start playing from a given position.
@@ -329,8 +330,10 @@ void XM7_PlayModule(XM7_ModuleManager_Type *TheModule);
 /// switch to a different tune you would then simply stop the module and play
 /// the same module again just starting from a different position.
 ///
-/// @param TheModule Module to be played.
-/// @param position Position in Pattern Order Table.
+/// @param TheModule
+///     Module to be played.
+/// @param position
+///     Position in Pattern Order Table.
 void XM7_PlayModuleFromPos(XM7_ModuleManager_Type *TheModule, u8 position);
 
 /// This function stops the module.
@@ -357,16 +360,21 @@ void XM7_StopModule(void);
 /// which is 0 when the loading is successful and a different value when the
 /// loading has a different outcome.
 ///
-/// @param Module Pointer to an allocated XM7_ModuleManager_Type structure.
-/// @param XMModule_ Pointer to the XM file in RAM.
-/// @return Error code.
+/// @param Module
+///     Pointer to an allocated XM7_ModuleManager_Type structure.
+/// @param XMModule_
+///     Pointer to the XM file in RAM.
+///
+/// @return
+///     Error code.
 XM7_Error XM7_LoadXM(XM7_ModuleManager_Type *Module, const void *XMModule_);
 
 /// This function frees all the allocated memory thus unloading the module.
 ///
 /// It doesn't deallocate the `XM7_ModuleManager_Type` structure.
 ///
-/// @param Module Pointer to an allocated XM7_ModuleManager_Type structure.
+/// @param Module
+///     Pointer to an allocated XM7_ModuleManager_Type structure.
 void XM7_UnloadXM(XM7_ModuleManager_Type *Module);
 
 /// Load a MOD into a `XM7_ModuleManager_Type` structure.
@@ -379,9 +387,13 @@ void XM7_UnloadXM(XM7_ModuleManager_Type *Module);
 /// which is 0 when the loading is successful and a different value when the
 /// loading has a different outcome.
 ///
-/// @param Module Pointer to an allocated XM7_ModuleManager_Type structure.
-/// @param MODModule_ Pointer to the MOD file in RAM.
-/// @return Error code.
+/// @param Module
+///     Pointer to an allocated XM7_ModuleManager_Type structure.
+/// @param MODModule_
+///     Pointer to the MOD file in RAM.
+///
+/// @return
+///     Error code.
 XM7_Error XM7_LoadMOD(XM7_ModuleManager_Type* Module, const void* MODModule_);
 
 /// This function frees all the allocated memory thus unloading the module.
@@ -390,7 +402,8 @@ XM7_Error XM7_LoadMOD(XM7_ModuleManager_Type* Module, const void* MODModule_);
 ///
 /// This function is just an alias of XM7_UnloadXM(), for your convenience.
 ///
-/// @param Module Pointer to an allocated XM7_ModuleManager_Type structure.
+/// @param Module
+///     Pointer to an allocated XM7_ModuleManager_Type structure.
 void XM7_UnloadMOD(XM7_ModuleManager_Type *Module);
 
 /// Setup the replay style of the module.
@@ -401,8 +414,10 @@ void XM7_UnloadMOD(XM7_ModuleManager_Type *Module);
 /// effect `0xy` (Arpeggio) and activates/deactivates the 'on-the-fly sample
 /// change' feature.
 ///
-/// @param Module Pointer to an allocated XM7_ModuleManager_Type structure.
-/// @param style Replay style.
+/// @param Module
+///     Pointer to an allocated XM7_ModuleManager_Type structure.
+/// @param style
+///     Replay style.
 void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style);
 
 /// This function configures how the panning is managed in the reproduction.
@@ -419,9 +434,12 @@ void XM7_SetReplayStyle(XM7_ModuleManager_Type* Module, XM7_ReplayStyles style);
 /// originally assigned speaker, maximum value is 127 (which actually will
 /// completely swap channels...).
 ///
-/// @param Module Pointer to an allocated XM7_ModuleManager_Type structure.
-/// @param style Panning style.
-/// @param displacement Displacement style.
+/// @param Module
+///     Pointer to an allocated XM7_ModuleManager_Type structure.
+/// @param style
+///     Panning style.
+/// @param displacement
+///     Displacement style.
 void XM7_SetPanningStyle(XM7_ModuleManager_Type* Module, XM7_PanningStyles style,
                          XM7_PanningDisplacementStyles displacement);
 
