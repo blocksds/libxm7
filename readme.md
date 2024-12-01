@@ -21,7 +21,7 @@ Old homepage: http://wcms.teleion.it/users/cgq/nds/libxm7/
 
 Please, check the documentation here:
 
-- [Documentation](https://blocksds.github.io/docs/libxm7/index.html)
+- [Documentation](https://blocksds.skylyrac.net/docs/libxm7/index.html)
 - [Example](https://github.com/blocksds/sdk/tree/master/examples/audio/libxm7)
 
 ## Acknowledgements
