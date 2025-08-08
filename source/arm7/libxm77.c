@@ -164,7 +164,7 @@ static void XM7_lowlevel_stopSound(u8 channel)
 {
     // use channels starting from last!
     channel = 15 - channel;
-    SCHANNEL_CR(channel) = 0;
+    REG_SOUNDXCNT(channel) = 0;
 }
 
 /*
@@ -172,14 +172,14 @@ static void XM7_lowlevel_pauseSound(u8 channel)
 {
     // use channels starting from last!
     channel = 15 - channel;
-    SCHANNEL_CR(channel) &= ~SCHANNEL_CR_ENABLE;
+    REG_SOUNDXCNT(channel) &= ~SOUNDXCNT_ENABLE;
 }
 
 static void XM7_lowlevel_resumeSound(u8 channel)
 {
     // use channels starting from last!
     channel = 15 - channel;
-    SCHANNEL_CR(channel) |= SCHANNEL_CR_ENABLE;
+    REG_SOUNDXCNT(channel) |= SOUNDXCNT_ENABLE;
 }
 */
 
@@ -189,19 +189,19 @@ static void XM7_lowlevel_startSound(int sampleRate, const void *data, u32 length
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_CR(channel) = 0;
+    REG_SOUNDXCNT(channel) = 0;
     offset = format ? (offset * 2) : offset;
 
     // check if offset is still IN the sample (and len>0)
     if (length > offset)
     {
-        SCHANNEL_TIMER(channel) = SCHANNEL_FREQ(sampleRate);
-        SCHANNEL_SOURCE(channel) = ((u32)data) + offset;
-        SCHANNEL_REPEAT_POINT(channel) = 0;
-        SCHANNEL_LENGTH(channel) = (length - offset) >> 2;
-        SCHANNEL_CR(channel) = SCHANNEL_CR_ENABLE | SCHANNEL_CR_ONE_SHOT
-                | SCHANNEL_CR_VOL_MUL(vol) | SCHANNEL_CR_PAN(pan)
-                | (format == 0 ? SCHANNEL_CR_FORMAT_8BIT : SCHANNEL_CR_FORMAT_16BIT);
+        REG_SOUNDXTMR(channel) = SOUNDXTMR_FREQ(sampleRate);
+        REG_SOUNDXSAD(channel) = ((u32)data) + offset;
+        REG_SOUNDXPNT(channel) = 0;
+        REG_SOUNDXLEN(channel) = (length - offset) >> 2;
+        REG_SOUNDXCNT(channel) = SOUNDXCNT_ENABLE | SOUNDXCNT_ONE_SHOT
+                | SOUNDXCNT_VOL_MUL(vol) | SOUNDXCNT_PAN(pan)
+                | (format == 0 ? SOUNDXCNT_FORMAT_8BIT : SOUNDXCNT_FORMAT_16BIT);
     }
 }
 
@@ -211,7 +211,7 @@ static void XM7_lowlevel_startSoundwLoop(int sampleRate, const void *data, u32 l
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_CR(channel) = 0;
+    REG_SOUNDXCNT(channel) = 0;
     offset = format ? (offset * 2) : offset;
 
     // check if offset is still IN the sample (and len>0)
@@ -222,13 +222,13 @@ static void XM7_lowlevel_startSoundwLoop(int sampleRate, const void *data, u32 l
         if (offset > loopstart)
             offset = (format == 0 ? loopstart : (loopstart >> 1));
 
-        SCHANNEL_TIMER(channel) = SCHANNEL_FREQ(sampleRate);
-        SCHANNEL_SOURCE(channel) = ((u32)data) + offset;
-        SCHANNEL_REPEAT_POINT(channel) = (loopstart - offset) >> 2;
-        SCHANNEL_LENGTH(channel) = looplength >> 2;
-        SCHANNEL_CR(channel) = SCHANNEL_CR_ENABLE
-                | SCHANNEL_CR_REPEAT | SCHANNEL_CR_VOL_MUL(vol) | SCHANNEL_CR_PAN(pan)
-                | (format ? SCHANNEL_CR_FORMAT_16BIT : SCHANNEL_CR_FORMAT_8BIT);
+        REG_SOUNDXTMR(channel) = SOUNDXTMR_FREQ(sampleRate);
+        REG_SOUNDXSAD(channel) = ((u32)data) + offset;
+        REG_SOUNDXPNT(channel) = (loopstart - offset) >> 2;
+        REG_SOUNDXLEN(channel) = looplength >> 2;
+        REG_SOUNDXCNT(channel) = SOUNDXCNT_ENABLE
+                | SOUNDXCNT_REPEAT | SOUNDXCNT_VOL_MUL(vol) | SOUNDXCNT_PAN(pan)
+                | (format ? SOUNDXCNT_FORMAT_16BIT : SOUNDXCNT_FORMAT_8BIT);
     }
 }
 
@@ -237,8 +237,8 @@ static void XM7_lowlevel_setVolumeandPanning(u8 channel, u8 vol, u8 pan)
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_VOL(channel) = vol & 0x7f;
-    SCHANNEL_PAN(channel) = pan & 0x7f;
+    REG_SOUNDXVOL(channel) = vol & 0x7f;
+    REG_SOUNDXPAN(channel) = pan & 0x7f;
 }
 
 static void XM7_lowlevel_pitchSound (int sampleRate, u8 channel)
@@ -246,12 +246,12 @@ static void XM7_lowlevel_pitchSound (int sampleRate, u8 channel)
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_TIMER(channel) = SCHANNEL_FREQ(sampleRate);
+    REG_SOUNDXTMR(channel) = SOUNDXTMR_FREQ(sampleRate);
 }
 
-// define this to access the higherbyte of SCHANNEL_CR
-//#define SCHANNEL_CR_HIGHERBYTE(n)   (*(vu8 *)(0x04000403 + ((n) << 4)))
-//#define SCHANNEL_CR_SHIFTBITS       24
+// define this to access the high byte of REG_SOUNDXCNT
+//#define SOUNDXCNT_HIGHERBYTE(n)   (*(vu8 *)(0x04000403 + ((n) << 4)))
+//#define SOUNDXCNT_SHIFTBITS       24
 
 static void XM7_lowlevel_changeSample(const void *data, u32 looplength, u32 loopstart,
                                       u8 channel, u8 format)
@@ -261,13 +261,13 @@ static void XM7_lowlevel_changeSample(const void *data, u32 looplength, u32 loop
     // use channels starting from last!
     channel = 15 - channel;
 
-    SCHANNEL_SOURCE(channel) = (u32)data;
-    SCHANNEL_REPEAT_POINT(channel) = loopstart >> 2;
-    SCHANNEL_LENGTH(channel) = looplength >> 2;
+    REG_SOUNDXSAD(channel) = (u32)data;
+    REG_SOUNDXPNT(channel) = loopstart >> 2;
+    REG_SOUNDXLEN(channel) = looplength >> 2;
     // BETA: sets sound_repeat even if it's not
     // BETA2: doesn't change that because MOD support only 8 bits samples
-    // SCHANNEL_CR_HIGHERBYTE(channel) = (SCHANNEL_CR_ENABLE | SCHANNEL_CR_REPEAT |
-    //      (format ? SCHANNEL_CR_FORMAT_16BIT : SCHANNEL_CR_FORMAT_8BIT)) >> SCHANNEL_CR_SHIFTBITS;
+    // SOUNDXCNT_HIGHERBYTE(channel) = (SOUNDXCNT_ENABLE | SOUNDXCNT_REPEAT |
+    //      (format ? SOUNDXCNT_FORMAT_16BIT : SOUNDXCNT_FORMAT_8BIT)) >> SOUNDXCNT_SHIFTBITS;
 }
 
 static void SetTimerSpeedBPM(u8 BPM)
@@ -2693,16 +2693,16 @@ void XM7_Initialize(void)
 /*
 void startSound(int sampleRate, const void* data, u32 bytes, u8 channel, u8 vol,  u8 pan, u8 format)
 {
-    SCHANNEL_CR(channel) = 0;
+    REG_SOUNDXCNT(channel) = 0;
 
     if (bytes > 0)
     {
-        SCHANNEL_TIMER(channel) = SCHANNEL_FREQ(sampleRate);
-        SCHANNEL_SOURCE(channel) = (u32)data;
-        SCHANNEL_LENGTH(channel) = bytes >> 2;
-        SCHANNEL_CR(channel) = SCHANNEL_CR_ENABLE | SCHANNEL_CR_ONE_SHOT
-                | SCHANNEL_CR_VOL_MUL(vol) | SCHANNEL_CR_PAN(pan)
-                | (format == 0 ? SOUND_8BIT : SOUND_16BIT);
+        REG_SOUNDXTMR(channel) = SOUNDXTMR_FREQ(sampleRate);
+        REG_SOUNDXSAD(channel) = (u32)data;
+        REG_SOUNDXLEN(channel) = bytes >> 2;
+        REG_SOUNDXCNT(channel) = SOUNDXCNT_ENABLE | SOUNDXCNT_ONE_SHOT
+                | SOUNDXCNT_VOL_MUL(vol) | SOUNDXCNT_PAN(pan)
+                | (format == 0 ? SOUNDXCNT_FORMAT_8BIT : SOUNDXCNT_FORMAT_16BIT);
     }
 }
 */
