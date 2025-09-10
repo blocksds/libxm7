@@ -2071,7 +2071,7 @@ static void Timer0Handler(void)
         }
 
         // check if portamento to note (Mx)
-        if ((CurrNote->Volume >= 0xf0) && (CurrNote->Volume <= 0xff))
+        if ((CurrNote->Volume >= 0xf0)) // && (CurrNote->Volume <= 0xff))
             PitchToNote = YES;
 
         // is there a note specified?
