@@ -2,6 +2,7 @@
 //
 // Copyright (c) 2018 sverx
 
+#include <assert.h>
 #include <stdlib.h>
 
 #include <nds.h>
@@ -9,6 +10,9 @@
 #include <libxm7.h>
 
 #include "libxm7_internal.h"
+
+// Let's make sure that we use the timer that libnds expects us to use
+static_assert(LIBNDS_DEFAULT_TIMER_MUSIC == 0);
 
 // these are the variables I need to make the module play!
 static XM7_ModuleManager_Type* XM7_TheModule;
