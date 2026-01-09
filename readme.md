@@ -23,7 +23,7 @@ Please, report issues [here](https://github.com/blocksds/sdk/issues).
 
 Please, check the documentation here:
 
-- [Documentation](https://blocksds.skylyrac.net/docs/libxm7/index.html)
+- [Documentation](https://blocksds.skylyrac.net/libxm7/index.html)
 - [Example](https://github.com/blocksds/sdk/tree/master/examples/audio/libxm7)
 
 ## Acknowledgements
