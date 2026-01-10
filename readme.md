@@ -24,7 +24,7 @@ Please, report issues [here](https://codeberg.org/blocksds/sdk/issues).
 Please, check the documentation here:
 
 - [Documentation](https://blocksds.skylyrac.net/libxm7/index.html)
-- [Example](https://github.com/blocksds/sdk/tree/master/examples/audio/libxm7)
+- [Examples](https://codeberg.org/blocksds/sdk/src/branch/master/examples/libxm7)
 
 ## Acknowledgements
 
