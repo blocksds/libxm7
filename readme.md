@@ -17,7 +17,7 @@ Old homepage: http://wcms.teleion.it/users/cgq/nds/libxm7/
 
 [Changelog](./changelog.txt)
 
-Please, report issues [here](https://github.com/blocksds/sdk/issues).
+Please, report issues [here](https://codeberg.org/blocksds/sdk/issues).
 
 ## Documentation
 
